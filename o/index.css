@@ -1,0 +1,490 @@
+@font-face {
+    font-family: 'meow';
+    src: url('../fonts/MiaulerMono-Regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'EVA';
+    src: url('../fonts/NIS-JTC-Win-M9.woff2') format('woff2'),
+         url('../fonts/NIS-JTC-Win-M9.ttf') format('truetype');
+    font-display: swap;
+}
+
+:root {
+    --lcd-color: #6f7e53;
+    --shadow-color: #8ea17e;
+    --shadow: 0.25vh;
+    --bivert-text-shadow:
+        calc(-1 * var(--shadow)) calc(-1 * var(--shadow)) var(--shadow-color),
+        0 calc(-1 * var(--shadow)) var(--shadow-color),
+        calc(-1 * var(--shadow)) 0 var(--shadow-color);
+    --invert-text-shadow:
+        var(--shadow) var(--shadow) var(--shadow-color),
+        0 var(--shadow) var(--shadow-color),
+        var(--shadow) 0 var(--shadow-color);
+}
+
+.bivert, .invert {
+    filter: drop-shadow(var(--shadow) var(--shadow) var(--shadow-color));
+    opacity: 0;
+    animation: lcd-flicker-on 0.5s step-start forwards;
+}
+
+.bivert {
+    color: white;
+    background: var(--lcd-color);
+
+    & p, & a { text-shadow: var(--bivert-text-shadow); }
+}
+
+.invert {
+    color: var(--lcd-color);
+    font-weight: bold;
+}
+
+.flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(13, 1fr);
+    gap: var(--grid-gap);
+}
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+html {
+    --full-height: 100vh;
+
+    @supports (height: 100svh) { --full-height: 100svh; }
+
+    box-sizing: border-box;
+    height: 100%;
+    scroll-behavior: smooth;
+    scroll-padding-top: 0;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    user-select: none;
+    cursor: crosshair; /* TODO: Make custom cursor. */
+    
+    /* Slow scroll behavior */
+    scroll-snap-type: none;
+
+    & body {
+        position: relative;
+        z-index: 0;
+        width: 100vw;
+        min-height: var(--full-height);
+        overflow-x: hidden;
+        overflow-y: auto;
+        font-family: 'meow';
+        font-size: 4vh;
+        letter-spacing: 0.6vh;
+        background: linear-gradient(100deg, #d3dda1 16%, #c3c3b0 100%);
+        mix-blend-mode: darken;
+        padding: 0;
+        margin: 0;
+    }
+
+    & a {
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    & svg { position: absolute; }
+
+    &:after {
+        content: '';
+        position: fixed;
+        width: 100vw;
+        height: var(--full-height);
+        pointer-events: none;
+        opacity: 0.1;
+        mix-blend-mode: darken;
+
+        --space: 8vh;
+        --thick: 1vh;
+        --cross: var(--lcd-color);
+        --field: white;
+
+        background:
+            linear-gradient(to right, #585858 1px, transparent 1px) 0.7vh 0.7vh / 0.5vh 0.5vh,
+            linear-gradient(to bottom, #585858 1px, transparent 1px) 0.7vh 0.7vh / 0.5vh 0.5vh,
+            radial-gradient(circle, transparent 20%, var(--field) 20%, var(--field) 80%, transparent 80%, transparent) 0 0 / calc(2 * var(--space)) calc(2 * var(--space)),
+            radial-gradient(circle, transparent 20%, var(--field) 20%, var(--field) 80%, transparent 80%, transparent) var(--space) var(--space) / calc(2 * var(--space)) calc(2 * var(--space)),
+            linear-gradient(var(--cross) calc(0.5 * var(--thick)), transparent calc(0.5 * var(--thick))) 0 calc(-0.25 * var(--thick)) / var(--space) var(--space),
+            linear-gradient(90deg, var(--cross) calc(0.5 * var(--thick)), var(--field) calc(0.5 * var(--thick))) calc(-0.25 * var(--thick)) 0 / var(--space) var(--space),
+            var(--field);
+    }
+}
+
+#motd, #罪 {
+    position: relative;
+    width: calc(100vw - 6vh);
+    margin: 2vh auto;
+    flex-direction: column;
+    outline: 0.5vh solid var(--lcd-color);
+    outline-offset: 1vh;
+    text-align: center;
+}
+
+#motd {
+    z-index: 0;
+    max-width: 50ch;
+    height: fit-content;
+    padding: 2vh;
+    animation-delay: var(--delay);
+
+    & a {
+        border: 0.5vh solid white;
+        padding: 0.5vh 1vh 0 1.5vh;
+        box-shadow:
+            inset calc(-1 * var(--shadow)) calc(-1 * var(--shadow)) var(--shadow-color),
+            var(--bivert-text-shadow);
+        transition: background-color 0.2s;
+
+        &:hover {
+            border: none;
+            font-weight: bold;
+            background: white;
+            color: #6f7e53;
+            text-shadow: var(--invert-text-shadow);
+            box-shadow: inset var(--shadow) var(--shadow) var(--shadow-color);
+        }
+    }
+
+    & p a.giving-block-link {
+        border: none;
+        padding: 0;
+        box-shadow: none;
+        color: white;
+        text-decoration: underline;
+        text-decoration-color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: color 0.2s ease, text-decoration-color 0.2s ease;
+
+        &:hover {
+            color: #8ea17e;
+            text-decoration-color: #8ea17e;
+            font-weight: normal;
+        }
+    }
+}
+
+#罪 {
+    z-index: 1;
+    max-width: calc(var(--full-height) - 6vh);
+    min-height: calc(var(--full-height) - 6vh);
+    height: fit-content;
+    animation-delay: 0.5s;
+
+    --grid-gap: 1vh;
+    --delay: 0.3s; /* 0.2s-0.5s is the ideal range. */
+
+    > div {
+        overflow: hidden;
+        filter: none; /* Remove redundant .invert/.bivert shadow effect. */
+
+        & img {
+            height: 7vh;
+            margin: 3vh;
+            transform: scale(2);
+        }
+
+        &.invert { border: 0.5vh solid var(--lcd-color); }
+
+        &.bivert { font-weight: normal; /* De-conflict .bivert font-weight specificity. */ }
+
+        &:nth-of-type(1) {
+            grid-row: 1 / 4;
+            grid-column: 1 / 4;
+            animation-delay: calc(4.6 * var(--delay));
+            filter: url('#pixelate');
+
+            & svg {
+                position: relative;
+                width: 100%;
+                height: 50%;
+                overflow: visible;
+                transform: scaleX(1.1) scaleY(1.5) translateX(0.2vh) translateY(1vh);
+
+                & text {
+                    font-family: 'EVA';
+                    font-size: 7vh;
+                    fill: var(--lcd-color);
+                }
+            }
+        }
+
+        &:nth-of-type(2) {
+            grid-row: 1 / 4;
+            grid-column: 4 / 9;
+            animation-delay: calc(5.6 * var(--delay));
+            filter: url('#pixelate');
+            perspective: 111111vh;
+            --cube-width: 20vh;
+
+            .circle {
+                position: absolute;
+                border-radius: 50%;
+            }
+
+            #inner {
+                width: 40vh;
+                height: 40vh;
+                border: 2vh double var(--lcd-color);
+            }
+
+            #outer {
+                width: 70vh;
+                height: 70vh;
+                border: 10vh solid var(--lcd-color);
+            }
+
+            #cube {
+                position: absolute;
+                width: var(--cube-width);
+                height: var(--cube-width);
+                transform-style: preserve-3d;
+                animation: rotate 16s linear infinite;
+
+                .face {
+                    position: absolute;
+                    width: var(--cube-width);
+                    height: var(--cube-width);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    border: 0.5vh solid var(--lcd-color);
+
+                    &:nth-of-type(1) { transform: translateZ(calc(0.5 * var(--cube-width))); }
+                    &:nth-of-type(2) { transform: rotateY(180deg) translateZ(calc(0.5 * var(--cube-width))); }
+                    &:nth-of-type(3) { transform: rotateY(-90deg) translateZ(calc(0.5 * var(--cube-width))); }
+                    &:nth-of-type(4) { transform: rotateY(90deg) translateZ(calc(0.5 * var(--cube-width))); }
+                    &:nth-of-type(5) { transform: rotateX(90deg) translateZ(calc(0.5 * var(--cube-width))); }
+                    &:nth-of-type(6) { transform: rotateX(-90deg) translateZ(calc(0.5 * var(--cube-width))); }
+
+                    & p {
+                        position: absolute;
+
+                        &:nth-of-type(1) {
+                            /* Not sure if it's a bug or not but the `inset` shorthand simply isn't working here. */
+                            top: 1vh;
+                            right: 2vh;
+                        }
+                        &:nth-of-type(2) {
+                            top: 1vh;
+                            left: 3vh;
+                        }
+                        &:nth-of-type(3) {
+                            bottom: 1vh;
+                            left: 2vh;
+                        }
+                        &:nth-of-type(4) {
+                            bottom: 1vh;
+                            right: 2vh;
+                        }
+                    }
+                }
+            }
+        }
+
+        &:nth-of-type(3),
+        &:nth-of-type(5) {
+            grid-column: 1 / 9;
+            animation-delay: calc(5.4 * var(--delay));
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 5vh,
+                var(--shadow-color) 5vh,
+                var(--shadow-color) 5.25vh,
+                var(--lcd-color) 5.25vh,
+                var(--lcd-color) 10vh
+            );
+        }
+
+        &:nth-of-type(3) { grid-row: 4 / 5; }
+
+        &:nth-of-type(4) {
+            grid-row: 5 / 11;
+            grid-column: 1 / 9;
+            animation-delay: calc(4.8 * var(--delay));
+
+            #scrollable {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                padding: 0 0 1vh 2vh;
+                overflow: auto;
+                text-align: left;
+                list-style-type: none;
+                letter-spacing: 0vh;
+                scrollbar-color: var(--shadow-color) var(--lcd-color);
+                /* background: url('gradient.png') repeat-y right scroll;
+                background-size: 18vh; */
+                image-rendering: pixelated;
+
+                & p:nth-of-type(1) { 
+                    text-indent: -1ch; 
+                }
+
+                .folder label, & a, .folder p {
+                    display: block;
+                    opacity: 0;
+                    animation: lcd-flicker-on 0.2s step-start forwards;
+                    white-space: nowrap;
+
+                    &:not(p) {
+                        cursor: pointer;
+                        &:hover {
+                            color: white;
+                            font-weight: normal;
+                            background: var(--lcd-color);
+                            text-shadow: var(--bivert-text-shadow);
+                            overflow-y: hidden;
+                        }
+                    }
+
+                    &:hover, &:not(:hover) {
+                        transition: background-color 0.2s;
+                    }
+
+                    &:active:not(p) { 
+                        background: var(--shadow-color); 
+                    }
+
+                    &:nth-of-type(1) { animation-delay: 0.1s; }
+                    &:nth-of-type(2) { animation-delay: 0.2s; }
+                    &:nth-of-type(3) { animation-delay: 0.3s; }
+                    &:nth-of-type(4) { animation-delay: 0.4s; }
+                    &:nth-of-type(5) { animation-delay: 0.5s; }
+                    &:nth-of-type(6) { animation-delay: 0.6s; }
+                    &:nth-of-type(7) { animation-delay: 0.7s; }
+                    &:nth-of-type(8) { animation-delay: 0.8s; }
+                    &:nth-of-type(9) { animation-delay: 0.9s; }
+                    &:nth-of-type(10) { animation-delay: 1.0s; }
+                }
+
+                .folder .content {
+                    display: none;
+                    margin-left: 2ch;
+
+                    &:nth-child(1n):before {
+                        content: 'Â§\00a0';
+                        float: left;
+                        text-indent: -2ch;
+                    }
+                }
+
+                .folder input[type="checkbox"] {
+                    display: none;
+
+                    &:checked + label + .content {
+                        display: block;
+                    }
+                }
+            }
+        }
+
+        &:nth-of-type(5) { grid-row: 11 / 12; }
+
+        &:nth-of-type(6) {
+            grid-row: 12 / 14;
+            grid-column: 1 / 5;
+            animation-delay: calc(5.2 * var(--delay));
+            border: 0.5vh solid var(--lcd-color);
+            flex-wrap: wrap;
+
+            & img { filter: drop-shadow(calc(-0.1 * var(--shadow)) calc(-0.1 * var(--shadow)) var(--shadow-color)); }
+
+            & p { margin: 0 0 1vh 4vh; }
+        }
+
+        &:nth-of-type(7) {
+            grid-row: 12 / 14;
+            grid-column: 5 / 9;
+            animation-delay: calc(5.0 * var(--delay));
+            flex-wrap: wrap;
+            flex-direction: row-reverse;
+
+            & p { margin: 0 4vh 1vh 0; }
+        }
+    }
+
+    /* Display is now handled by separate pages - no need for :target logic */
+}
+
+@keyframes lcd-flicker-on {
+    20% {
+        --lcd-color: #6f7e53;
+        --shadow-color: #6f7e53;
+    }
+    60% {
+        --lcd-color: #8ea17e;
+        --shadow-color: #8ea17e;
+    }
+    100% {
+        --lcd-color: #6f7e53;
+        --shadow-color: #8ea17e;
+    }
+    0%, 40%, 80% { opacity: 0; }
+    20%, 60%, 70%, 100% { opacity: 1; }
+}
+
+@keyframes lcd-flicker-off {
+    0% {
+        --lcd-color: #6f7e53;
+        --shadow-color: #8ea17e;
+    }
+    40% {
+        --lcd-color: #8ea17e;
+        --shadow-color: #8ea17e;
+    }
+    80% {
+        --lcd-color: #6f7e53;
+        --shadow-color: #6f7e53;
+    }
+    0%, 40%, 80% { opacity: 1; }
+    20%, 60%, 100% { opacity: 0; }
+}
+
+@keyframes rotate {
+    from { transform: rotateX(30deg) rotateZ(0deg); }
+    to { transform: rotateX(30deg) rotateZ(360deg); }
+}
+
+/* Smooth slow scrolling */
+* {
+    scroll-behavior: smooth;
+}
+
+/* Prevent scrolling past bottom */
+html {
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+}
+
+body {
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Prevent elastic scrolling on iOS/Safari */
+@supports (-webkit-overflow-scrolling: touch) {
+    html, body {
+        overscroll-behavior-y: none;
+        -webkit-overflow-scrolling: touch;
+    }
+}

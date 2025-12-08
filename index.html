@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>𝕂ℝ𝕐 • ℙ𝕋</title>
+    <link rel="preload" href="fonts/NIS-JTC-Win-M9.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/GASBOA.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" type="image/x-icon" href="icon.png">
+        <!-- OpenGraphs Bloat -->
+        <meta property="og:title" content="𝚔𝚗𝚞𝚕𝚕_𝚜𝚎𝚌𝚝𝚘𝚛@𝙺𝚁𝚈.𝙿𝚃:~$" />
+        <meta property="og:description" content="罪に罪を重ねるだけだよ。" />
+        <meta property="og:url" content="https://kry.pt" />
+        <meta property="og:image" content="https://kry.pt/banner.png" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="𝕂ℝ𝕐 • ℙ𝕋" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="𝚔𝚗𝚞𝚕𝚕_𝚜𝚎𝚌𝚝𝚘𝚛@𝙺𝚁𝚈.𝙿𝚃:~$" />
+        <meta name="twitter:description" content="罪に罪を重ねるだけだよ。" />
+        <meta name="twitter:image" content="https://kry.pt/banner.png" />
+        <meta name="twitter:site" content="@kryptware" />
+        <meta name="twitter:creator" content="@kryptonaut" />
+</head>
+<body>
+    <div id="sun"></div>
+    <img class="cloud" src="textures/cloud.webp">
+    <img class="cloud" src="textures/cloud.webp">
+    <img class="cloud" src="textures/cloud.webp">
+    <img class="cloud" src="textures/cloud.webp">
+    <img class="cloud" src="textures/cloud.webp">
+    <h1><a href="o/first.html"><img class="logo" src="textures/leologo.png"></a></h1>
+    <div id="grass"></div>
+    <div id="vignette"></div>
+    <p>$leo<br><br><span id="copyable">ca: <span id="copyable-text"></span><span class="tick">✓</span></span></p>
+    <svg width="0" height="0">
+        <defs>
+            <filter id="horizontal-blur">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10 0" result="blur" />
+                <feMerge>
+                    <feMergeNode in="SourceGraphic" />
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="blur" />
+                </feMerge>
+            </filter>
+        </defs>
+    </svg>
+    <script>
+        // Update this value to change the code
+        const CODE_VALUE = 'FKMdhDBjirErUMQbffsZiuvjptSwNnFW7kf6fvpTpump';
+        
+        const copyable = document.getElementById('copyable');
+        const copyableText = document.getElementById('copyable-text');
+        
+        // Set the display text
+        copyableText.textContent = CODE_VALUE;
+
+        copyable.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(CODE_VALUE);
+                copyable.classList.add('copied');
+                setTimeout(() => {
+                    copyable.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = CODE_VALUE;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    copyable.classList.add('copied');
+                    setTimeout(() => {
+                        copyable.classList.remove('copied');
+                    }, 2000);
+                } catch (fallbackErr) {
+                    console.error('Failed to copy:', fallbackErr);
+                }
+                document.body.removeChild(textArea);
+            }
+        });
+
+        // Logo center hover detection for unblur effect and clickable area
+        const logoH1 = document.querySelector('h1');
+        const logoLink = document.querySelector('h1 a');
+        const logoImg = document.querySelector('.logo');
+        
+        function isInCenterArea(x, y) {
+            if (!logoImg) return false;
+            
+            const rect = logoImg.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // Define center area as 70% width, 45% height (shorter)
+            const centerAreaWidth = rect.width * 0.70;
+            const centerAreaHeight = rect.height * 0.45;
+            
+            // Check if point is within center area
+            const inCenterX = Math.abs(x - centerX) < centerAreaWidth / 2;
+            const inCenterY = Math.abs(y - centerY) < centerAreaHeight / 2;
+            
+            return inCenterX && inCenterY;
+        }
+        
+        logoH1.addEventListener('mousemove', (e) => {
+            const inCenter = isInCenterArea(e.clientX, e.clientY);
+            if (inCenter) {
+                logoH1.classList.add('unblur');
+                logoLink.style.cursor = 'pointer';
+            } else {
+                logoH1.classList.remove('unblur');
+                logoLink.style.cursor = 'default';
+            }
+        });
+
+        logoH1.addEventListener('mouseleave', () => {
+            logoH1.classList.remove('unblur');
+            logoLink.style.cursor = 'default';
+        });
+
+        // Make link only clickable in center area
+        logoLink.addEventListener('click', (e) => {
+            if (!isInCenterArea(e.clientX, e.clientY)) {
+                e.preventDefault();
+            }
+        });
+        
+        // Prevent scrolling past the bottom
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight;
+            const maxScroll = scrollHeight - clientHeight;
+            
+            if (scrollTop > maxScroll) {
+                window.scrollTo(0, maxScroll);
+            }
+            lastScrollTop = scrollTop;
+        }, { passive: false });
+    </script>
+</body>
+</html>
