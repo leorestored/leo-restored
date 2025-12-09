@@ -36,6 +36,7 @@ __/\\\________/\\\______________________________________________________________
         <meta name="twitter:creator" content="@kryptonaut" />
 </head>
 <body class="flex">
+    <button id="copy-address" class="copy-button" data-full-text="FKMdhDBjirErUMQbffsZiuvjptSwNnFW7kf6fvpTpump"></button>
     <div id="motd" class="flex bivert">
         <div>
             <p>{ what is leo? }</p>
@@ -83,6 +84,30 @@ __/\\\________/\\\______________________________________________________________
         }
         lastScrollTop = scrollTop;
     }, { passive: false });
+
+    // Copy address button functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButton = document.getElementById('copy-address');
+        if (copyButton) {
+            const fullText = copyButton.getAttribute('data-full-text');
+            // Format: first 6 chars + ... + pump
+            const firstSix = fullText.substring(0, 6);
+            const displayText = 'ca: ' + firstSix + '...pump';
+            copyButton.textContent = displayText;
+            
+            copyButton.addEventListener('click', function() {
+                navigator.clipboard.writeText(fullText).then(function() {
+                    // Visual feedback
+                    copyButton.textContent = 'copied!';
+                    setTimeout(function() {
+                        copyButton.textContent = displayText;
+                    }, 1000);
+                }).catch(function(err) {
+                    console.error('Failed to copy:', err);
+                });
+            });
+        }
+    });
 </script>
 </html>
 

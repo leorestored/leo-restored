@@ -36,6 +36,7 @@ __/\\\________/\\\______________________________________________________________
         <meta name="twitter:creator" content="@kryptonaut" />
 </head>
 <body class="flex">
+    <button id="copy-address" class="copy-button" data-full-text="FKMdhDBjirErUMQbffsZiuvjptSwNnFW7kf6fvpTpump"></button>
     <div id="罪" class="grid invert">
         <div class="flex invert">
             <a href="first.html">
@@ -43,10 +44,13 @@ __/\\\________/\\\______________________________________________________________
             </a>
         </div>
         <div class="flex invert">
-            <!-- Section 2 - Top Right Left -->
+            <img src="../textures/leostylemain.png" alt="Leo Style Main">
         </div>
         <div class="flex invert">
-            <!-- Section 3 - Top Right Right -->
+            <!-- Section 3 - Top Right Middle -->
+        </div>
+        <div class="flex invert">
+            <!-- Section 4 - Top Right Right -->
         </div>
         <div class="invert"></div>
         <div class="invert">
@@ -135,20 +139,31 @@ __/\\\________/\\\______________________________________________________________
         </div>
         <div class="invert"></div>
         <div class="flex bivert">
-            <!-- Duplicate links for mobile functionality. -->
-            <a href="https://neocities.org/site/kryptonaut" target="_blank"><img src="penny.gif"></a>
-            <a href="https://neocities.org/site/kryptonaut" target="_blank"><p>HOSTED ON<br>NEOCITIES</p></a>
+            <a href="#" class="sub-square">
+                <img src="../textures/twitterlogo.png" alt="Twitter">
+            </a>
+            <a href="#" class="sub-square">
+                <img src="../textures/githublogo.png" alt="GitHub">
+            </a>
+            <a href="#" class="sub-square">
+                <img src="../textures/tgblogo.png" alt="TGB">
+            </a>
+            <a href="#" class="sub-square pf-logo">
+                <img src="../textures/pflogo.png" alt="PF" class="default-img">
+                <img src="../textures/pfhover.png" alt="PF Hover" class="hover-img">
+            </a>
         </div>
         <div class="flex bivert">
-            <!-- Section 2 -->
+            <!-- Duplicate links for mobile functionality. -->
+            <a href="https://neocities.org/site/kryptonaut" target="_blank"><img src="../textures/5.png"></a>
         </div>
         <div class="flex invert">
             <!-- Duplicate links for mobile functionality. -->
-            <a href="./kult/" target="_blank"><img src="poppy.gif"></a>
+            <a href="./kult/" target="_blank"><img src="../textures/4.png"></a>
             <a href="./kult/" target="_blank"> <p>JOIN THE<br>KULT</p></a>
         </div>
         <div class="flex invert">
-            <!-- Section 4 -->
+            <a href="#" target="_blank"><img src="../textures/6.png"></a>
         </div>
     </div>
 </body>
@@ -175,6 +190,30 @@ __/\\\________/\\\______________________________________________________________
         }
         lastScrollTop = scrollTop;
     }, { passive: false });
+
+    // Copy address button functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButton = document.getElementById('copy-address');
+        if (copyButton) {
+            const fullText = copyButton.getAttribute('data-full-text');
+            // Format: first 6 chars + ... + pump
+            const firstSix = fullText.substring(0, 6);
+            const displayText = 'ca: ' + firstSix + '...pump';
+            copyButton.textContent = displayText;
+            
+            copyButton.addEventListener('click', function() {
+                navigator.clipboard.writeText(fullText).then(function() {
+                    // Visual feedback
+                    copyButton.textContent = 'copied!';
+                    setTimeout(function() {
+                        copyButton.textContent = displayText;
+                    }, 1000);
+                }).catch(function(err) {
+                    console.error('Failed to copy:', err);
+                });
+            });
+        }
+    });
 </script>
 </html>
 
