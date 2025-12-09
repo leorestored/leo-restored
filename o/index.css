@@ -50,6 +50,11 @@
     height: 100%;
 }
 
+body.flex {
+    min-height: 100%;
+    height: auto;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
@@ -392,15 +397,22 @@ html {
                     &:nth-of-type(10) { animation-delay: 1.0s; }
                 }
 
+                .folder label {
+                    font-weight: bold;
+                    
+                    &:hover {
+                        font-weight: bold;
+                    }
+                }
+
+                .folder p {
+                    font-weight: bold;
+                    text-decoration: underline;
+                }
+
                 .folder .content {
                     display: none;
                     margin-left: 2ch;
-
-                    &:nth-child(1n):before {
-                        content: 'Â§\00a0';
-                        float: left;
-                        text-indent: -2ch;
-                    }
                 }
 
                 .folder input[type="checkbox"] {
