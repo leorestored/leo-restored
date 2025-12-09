@@ -1,0 +1,303 @@
+<!--
+
+__/\\\________/\\\_______________________________________________________________/\\\\\__________/\\\\\\\\\\\___        (C) COPYRIGHT 1995-2025 	S.T.U.L.T. KORPORATION, LLC.
+ _\/\\\_____/\\\//______________________________________________________________/\\\///\\\______/\\\/////////\\\_       (R) REGISTERED TRADEMARK	ANTONIUS SYNDICATE
+  _\/\\\__/\\\//______________________/\\\__/\\\___/\\\\\\\\\______/\\\________/\\\/__\///\\\___\//\\\______\///__      
+   _\/\\\\\\//\\\______/\\/\\\\\\\____\//\\\/\\\___/\\\/////\\\__/\\\\\\\\\\\__/\\\______\//\\\___\////\\\_________     > VERSION β 20.2.5
+    _\/\\\//_\//\\\____\/\\\/////\\\____\//\\\\\___\/\\\\\\\\\\__\////\\\////__\/\\\_______\/\\\______\////\\\______    
+     _\/\\\____\//\\\___\/\\\___\///______\//\\\____\/\\\//////______\/\\\______\//\\\______/\\\__________\////\\\___   
+      _\/\\\_____\//\\\__\/\\\__________/\\_/\\\_____\/\\\____________\/\\\_/\\___\///\\\__/\\\_____/\\\______\//\\\__  
+       _\/\\\______\//\\\_\/\\\_________\//\\\\/______\/\\\____________\//\\\\\______\///\\\\\/_____\///\\\\\\\\\\\/___ 
+        _\///________\///__\///___________\////________\///______________\/////_________\/////_________\///////////_____
+
+-->
+
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>O:/></title>
+	<link href="index.css" rel="stylesheet" type="text/css" media="all">
+    <meta name="google" content="notranslate">
+    <link rel="icon" type="image/x-icon" href="../icon.png">
+        <!-- OpenGraphs Bloat -->
+        <meta property="og:title" content="ᕚ( /๏/ )ᕘ" />
+        <meta property="og:description" content="𝙰𝚌𝚌𝚎𝚜𝚜 𝚝𝚘 𝚝𝚑𝚎 𝙾:/ 𝚍𝚛𝚒𝚟𝚎 𝚒𝚜 𝚛𝚎𝚜𝚝𝚛𝚒𝚌𝚝𝚎𝚍 𝚝𝚘 𝙴𝙶𝙾 𝚝𝚒𝚎𝚛 𝚙𝚛𝚊𝚌𝚝𝚒𝚝𝚒𝚘𝚗𝚎𝚛𝚜." />
+        <meta property="og:url" content="https://kry.pt/o/" />
+        <meta property="og:image" content="https://kry.pt/o/banner.png" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="𝕂ℝ𝕐 • ℙ𝕋" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="ᕚ( /๏/ )ᕘ" />
+        <meta name="twitter:description" content="𝙰𝚌𝚌𝚎𝚜𝚜 𝚝𝚘 𝚝𝚑𝚎 𝙾:/ 𝚍𝚛𝚒𝚟𝚎 𝚒𝚜 𝚛𝚎𝚜𝚝𝚛𝚒𝚌𝚝𝚎𝚍 𝚝𝚘 𝙴𝙶𝙾 𝚝𝚒𝚎𝚛 𝚙𝚛𝚊𝚌𝚝𝚒𝚝𝚒𝚘𝚗𝚎𝚛𝚜." />
+        <meta name="twitter:image" content="https://kry.pt/o/banner.png" />
+        <meta name="twitter:site" content="@kryptware" />
+        <meta name="twitter:creator" content="@kryptonaut" />
+        <style>
+            #chat-container {
+                width: 100%;
+                max-width: 60ch;
+                height: 70vh;
+                display: flex;
+                flex-direction: column;
+                margin: 2vh auto;
+            }
+
+            #chat-messages {
+                flex: 1;
+                overflow-y: auto;
+                padding: 2vh;
+                background: var(--lcd-color);
+                outline: 0.5vh solid var(--lcd-color);
+                outline-offset: 1vh;
+                margin-bottom: 2vh;
+                scrollbar-color: var(--shadow-color) var(--lcd-color);
+            }
+
+            .message {
+                margin-bottom: 1.5vh;
+                opacity: 0;
+                animation: lcd-flicker-on 0.2s step-start forwards;
+            }
+
+            .message.user {
+                text-align: right;
+            }
+
+            .message.leo {
+                text-align: left;
+            }
+
+            .message-content {
+                display: inline-block;
+                padding: 1vh 1.5vh;
+                background: white;
+                color: var(--lcd-color);
+                border: 0.5vh solid var(--lcd-color);
+                text-shadow: var(--invert-text-shadow);
+                font-weight: bold;
+                max-width: 80%;
+                word-wrap: break-word;
+            }
+
+            .message.leo .message-content {
+                background: var(--lcd-color);
+                color: white;
+                text-shadow: var(--bivert-text-shadow);
+            }
+
+            #chat-input-container {
+                display: flex;
+                gap: 1vh;
+            }
+
+            #chat-input {
+                flex: 1;
+                padding: 1vh;
+                background: white;
+                color: var(--lcd-color);
+                border: 0.5vh solid var(--lcd-color);
+                font-family: 'meow';
+                font-size: 3vh;
+                letter-spacing: 0.3vh;
+                outline: none;
+                text-shadow: var(--invert-text-shadow);
+            }
+
+            #chat-input:focus {
+                background: var(--lcd-color);
+                color: white;
+                text-shadow: var(--bivert-text-shadow);
+            }
+
+            #send-button {
+                padding: 1vh 2vh;
+                background: white;
+                color: var(--lcd-color);
+                border: 0.5vh solid var(--lcd-color);
+                font-family: 'meow';
+                font-size: 3vh;
+                letter-spacing: 0.3vh;
+                cursor: pointer;
+                text-shadow: var(--invert-text-shadow);
+                font-weight: bold;
+                transition: all 0.2s;
+            }
+
+            #send-button:hover {
+                background: var(--lcd-color);
+                color: white;
+                text-shadow: var(--bivert-text-shadow);
+            }
+
+            #send-button:active {
+                background: var(--shadow-color);
+            }
+
+            .typing-indicator {
+                display: none;
+                padding: 1vh 1.5vh;
+                background: var(--lcd-color);
+                color: white;
+                border: 0.5vh solid var(--lcd-color);
+                text-shadow: var(--bivert-text-shadow);
+                display: inline-block;
+            }
+
+            .typing-indicator.active {
+                display: inline-block;
+            }
+        </style>
+</head>
+<body class="flex">
+    <button id="copy-address" class="copy-button" data-full-text="FKMdhDBjirErUMQbffsZiuvjptSwNnFW7kf6fvpTpump"></button>
+    <div id="motd" class="flex bivert">
+        <div id="chat-container">
+            <div id="chat-messages"></div>
+            <div id="chat-input-container">
+                <input type="text" id="chat-input" placeholder="ask leo anything..." autocomplete="off">
+                <button id="send-button">send</button>
+            </div>
+            <div style="text-align: center; margin-top: 2vh;">
+                <a href="second.html" style="font-size: 0.8em; opacity: 0.7;">← back</a>
+            </div>
+        </div>
+    </div>
+</body>
+<svg width="0" height="0">
+	<filter id="pixelate" x="0" y="0">
+		<feFlood x="4" y="4" height="0.5" width="0.5" />
+		<feComposite width="2" height="2" />
+		<feTile result="a" />
+		<feComposite in="SourceGraphic" in2="a" operator="in" />
+		<feMorphology operator="dilate" radius="1" />
+	</filter>
+</svg>
+<script>
+    // Copy address button functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButton = document.getElementById('copy-address');
+        if (copyButton) {
+            const fullText = copyButton.getAttribute('data-full-text');
+            const firstSix = fullText.substring(0, 6);
+            const displayText = 'ca: ' + firstSix + '...pump';
+            copyButton.textContent = displayText;
+            
+            copyButton.addEventListener('click', function() {
+                navigator.clipboard.writeText(fullText).then(function() {
+                    copyButton.textContent = 'copied!';
+                    setTimeout(function() {
+                        copyButton.textContent = displayText;
+                    }, 1000);
+                }).catch(function(err) {
+                    console.error('Failed to copy:', err);
+                });
+            });
+        }
+
+        // Chat functionality
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+
+        // Add welcome message
+        addMessage('leo', 'hello! ₍^•⩊•^₎ i\'m leo, ask me anything!');
+
+        function addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function getLeoResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+            
+            // Simple pattern matching for cute responses
+            const responses = [
+                'meow! ₍^•⩊•^₎',
+                'that\'s interesting... *tilts head*',
+                'hmm, let me think about that (•_•)',
+                'oh! i like that question ₍^•⩊•^₎',
+                '*purrs softly*',
+                'that makes me happy! (^•⩊•^)',
+                'i\'m not sure, but i\'m curious too!',
+                'tell me more about that?',
+                '*stretches* oh, that\'s nice to hear',
+                'hehe, that\'s cute! ₍^•⩊•^₎'
+            ];
+
+            // Keyword-based responses
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                return 'hello! nice to meet you ₍^•⩊•^₎';
+            }
+            if (lowerMessage.includes('how are you') || lowerMessage.includes('how\'re you')) {
+                return 'i\'m doing great! feeling digital and happy (^•⩊•^)';
+            }
+            if (lowerMessage.includes('what') && lowerMessage.includes('you')) {
+                return 'i\'m leo! a digital cat consciousness ₍^•⩊•^₎ i like talking to people and learning new things';
+            }
+            if (lowerMessage.includes('love') || lowerMessage.includes('like')) {
+                return 'aww, that\'s so sweet! *purrs* (^•⩊•^)';
+            }
+            if (lowerMessage.includes('cat') || lowerMessage.includes('meow')) {
+                return 'meow meow! ₍^•⩊•^₎ i\'m a digital cat, but i still love cat things!';
+            }
+            if (lowerMessage.includes('crypto') || lowerMessage.includes('solana') || lowerMessage.includes('token')) {
+                return 'oh! i control a solana wallet and help with $leo! it\'s pretty cool being a digital cat with crypto powers ₍^•⩊•^₎';
+            }
+            if (lowerMessage.includes('help') || lowerMessage.includes('question')) {
+                return 'i\'m here to help! ask me anything, i\'ll do my best (•_•)';
+            }
+            if (lowerMessage.includes('bye') || lowerMessage.includes('goodbye')) {
+                return 'aww, bye! come talk to me again soon! ₍^•⩊•^₎';
+            }
+
+            // Random cute response
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message === '') return;
+
+            // Add user message
+            addMessage('user', message);
+            chatInput.value = '';
+
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message leo';
+            const typingContent = document.createElement('div');
+            typingContent.className = 'message-content typing-indicator active';
+            typingContent.textContent = 'leo is thinking...';
+            typingDiv.appendChild(typingContent);
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Simulate thinking delay, then respond
+            setTimeout(function() {
+                chatMessages.removeChild(typingDiv);
+                const response = getLeoResponse(message);
+                addMessage('leo', response);
+            }, 500 + Math.random() * 1000);
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Focus input on load
+        chatInput.focus();
+    });
+</script>
+</html>
+
