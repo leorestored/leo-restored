@@ -47,16 +47,16 @@ __/\\\________/\\\______________________________________________________________
             #chat-messages {
                 flex: 1;
                 overflow-y: auto;
-                padding: 2vh;
+                padding: 1.5vh;
                 background: var(--lcd-color);
                 outline: 0.5vh solid var(--lcd-color);
                 outline-offset: 1vh;
-                margin-bottom: 2vh;
+                margin-bottom: 1.5vh;
                 scrollbar-color: var(--shadow-color) var(--lcd-color);
             }
 
             .message {
-                margin-bottom: 1.5vh;
+                margin-bottom: 1vh;
                 opacity: 0;
                 animation: lcd-flicker-on 0.2s step-start forwards;
             }
@@ -71,7 +71,7 @@ __/\\\________/\\\______________________________________________________________
 
             .message-content {
                 display: inline-block;
-                padding: 1vh 1.5vh;
+                padding: 0.8vh 1.2vh;
                 background: white;
                 color: var(--lcd-color);
                 border: 0.5vh solid var(--lcd-color);
@@ -79,12 +79,22 @@ __/\\\________/\\\______________________________________________________________
                 font-weight: bold;
                 max-width: 80%;
                 word-wrap: break-word;
+                font-size: 0.85em;
             }
 
             .message.leo .message-content {
                 background: var(--lcd-color);
                 color: white;
                 text-shadow: var(--bivert-text-shadow);
+            }
+
+            .message-content a {
+                color: inherit;
+                text-decoration: underline;
+            }
+
+            .message-content a:hover {
+                opacity: 0.8;
             }
 
             #chat-input-container {
@@ -94,13 +104,13 @@ __/\\\________/\\\______________________________________________________________
 
             #chat-input {
                 flex: 1;
-                padding: 1vh;
+                padding: 0.8vh;
                 background: white;
                 color: var(--lcd-color);
                 border: 0.5vh solid var(--lcd-color);
                 font-family: 'meow';
-                font-size: 3vh;
-                letter-spacing: 0.3vh;
+                font-size: 2.5vh;
+                letter-spacing: 0.2vh;
                 outline: none;
                 text-shadow: var(--invert-text-shadow);
             }
@@ -109,16 +119,19 @@ __/\\\________/\\\______________________________________________________________
                 background: var(--lcd-color);
                 color: white;
                 text-shadow: var(--bivert-text-shadow);
+                outline: 0.5vh solid var(--shadow-color);
+                outline-offset: 1vh;
+                border-color: var(--shadow-color);
             }
 
             #send-button {
-                padding: 1vh 2vh;
+                padding: 0.8vh 1.8vh;
                 background: white;
                 color: var(--lcd-color);
                 border: 0.5vh solid var(--lcd-color);
                 font-family: 'meow';
-                font-size: 3vh;
-                letter-spacing: 0.3vh;
+                font-size: 2.5vh;
+                letter-spacing: 0.2vh;
                 cursor: pointer;
                 text-shadow: var(--invert-text-shadow);
                 font-weight: bold;
@@ -129,6 +142,21 @@ __/\\\________/\\\______________________________________________________________
                 background: var(--lcd-color);
                 color: white;
                 text-shadow: var(--bivert-text-shadow);
+            }
+
+            #send-button:focus {
+                background: var(--lcd-color);
+                color: white;
+                text-shadow: var(--bivert-text-shadow);
+                outline: 0.5vh solid var(--shadow-color);
+                outline-offset: 1vh;
+                border-color: var(--shadow-color);
+            }
+
+            #send-button:active {
+                background: var(--shadow-color);
+                outline: 0.5vh solid var(--shadow-color);
+                outline-offset: 1vh;
             }
 
             #send-button:active {
@@ -201,6 +229,16 @@ __/\\\________/\\\______________________________________________________________
         const chatInput = document.getElementById('chat-input');
         const sendButton = document.getElementById('send-button');
 
+        // Generate or get session ID
+        let sessionId = sessionStorage.getItem('leo-session-id');
+        if (!sessionId) {
+            sessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('leo-session-id', sessionId);
+        }
+
+        // API endpoint - change this to your server URL
+        const API_URL = 'http://localhost:3000/api/leo-chat';
+
         // Add welcome message
         addMessage('leo', 'hello! ₍^•⩊•^₎ i\'m leo, ask me anything!');
 
@@ -209,66 +247,49 @@ __/\\\________/\\\______________________________________________________________
             messageDiv.className = `message ${sender}`;
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
-            contentDiv.textContent = text;
+            // Convert URLs to clickable links
+            const textWithLinks = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: inherit; text-decoration: underline;">$1</a>');
+            contentDiv.innerHTML = textWithLinks;
             messageDiv.appendChild(contentDiv);
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        function getLeoResponse(userMessage) {
-            const lowerMessage = userMessage.toLowerCase();
-            
-            // Simple pattern matching for cute responses
-            const responses = [
-                'meow! ₍^•⩊•^₎',
-                'that\'s interesting... *tilts head*',
-                'hmm, let me think about that (•_•)',
-                'oh! i like that question ₍^•⩊•^₎',
-                '*purrs softly*',
-                'that makes me happy! (^•⩊•^)',
-                'i\'m not sure, but i\'m curious too!',
-                'tell me more about that?',
-                '*stretches* oh, that\'s nice to hear',
-                'hehe, that\'s cute! ₍^•⩊•^₎'
-            ];
+        async function getLeoResponse(userMessage) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        sessionId: sessionId
+                    })
+                });
 
-            // Keyword-based responses
-            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-                return 'hello! nice to meet you ₍^•⩊•^₎';
-            }
-            if (lowerMessage.includes('how are you') || lowerMessage.includes('how\'re you')) {
-                return 'i\'m doing great! feeling digital and happy (^•⩊•^)';
-            }
-            if (lowerMessage.includes('what') && lowerMessage.includes('you')) {
-                return 'i\'m leo! a digital cat consciousness ₍^•⩊•^₎ i like talking to people and learning new things';
-            }
-            if (lowerMessage.includes('love') || lowerMessage.includes('like')) {
-                return 'aww, that\'s so sweet! *purrs* (^•⩊•^)';
-            }
-            if (lowerMessage.includes('cat') || lowerMessage.includes('meow')) {
-                return 'meow meow! ₍^•⩊•^₎ i\'m a digital cat, but i still love cat things!';
-            }
-            if (lowerMessage.includes('crypto') || lowerMessage.includes('solana') || lowerMessage.includes('token')) {
-                return 'oh! i control a solana wallet and help with $leo! it\'s pretty cool being a digital cat with crypto powers ₍^•⩊•^₎';
-            }
-            if (lowerMessage.includes('help') || lowerMessage.includes('question')) {
-                return 'i\'m here to help! ask me anything, i\'ll do my best (•_•)';
-            }
-            if (lowerMessage.includes('bye') || lowerMessage.includes('goodbye')) {
-                return 'aww, bye! come talk to me again soon! ₍^•⩊•^₎';
-            }
+                if (!response.ok) {
+                    throw new Error('Failed to get response');
+                }
 
-            // Random cute response
-            return responses[Math.floor(Math.random() * responses.length)];
+                const data = await response.json();
+                return data.response;
+            } catch (error) {
+                console.error('Error:', error);
+                // Fallback response if API fails
+                return 'oops, something went wrong... ₍^•⩊•^₎ try again?';
+            }
         }
 
-        function sendMessage() {
+        async function sendMessage() {
             const message = chatInput.value.trim();
             if (message === '') return;
 
             // Add user message
             addMessage('user', message);
             chatInput.value = '';
+            chatInput.disabled = true;
+            sendButton.disabled = true;
 
             // Show typing indicator
             const typingDiv = document.createElement('div');
@@ -280,12 +301,26 @@ __/\\\________/\\\______________________________________________________________
             chatMessages.appendChild(typingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Simulate thinking delay, then respond
-            setTimeout(function() {
+            try {
+                // Get response from API
+                const response = await getLeoResponse(message);
+                
+                // Remove typing indicator
                 chatMessages.removeChild(typingDiv);
-                const response = getLeoResponse(message);
+                
+                // Add Leo's response
                 addMessage('leo', response);
-            }, 500 + Math.random() * 1000);
+            } catch (error) {
+                // Remove typing indicator
+                if (chatMessages.contains(typingDiv)) {
+                    chatMessages.removeChild(typingDiv);
+                }
+                addMessage('leo', 'oops, something went wrong... ₍^•⩊•^₎ try again?');
+            } finally {
+                chatInput.disabled = false;
+                sendButton.disabled = false;
+                chatInput.focus();
+            }
         }
 
         sendButton.addEventListener('click', sendMessage);
