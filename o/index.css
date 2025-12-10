@@ -1,12 +1,12 @@
 @font-face {
     font-family: 'meow';
-    src: url('../fonts/MiaulerMono-Regular.woff2') format('woff2');
+    src: url('/fonts/MiaulerMono-Regular.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'EVA';
-    src: url('../fonts/NIS-JTC-Win-M9.woff2') format('woff2'),
-         url('../fonts/NIS-JTC-Win-M9.ttf') format('truetype');
+    src: url('/fonts/NIS-JTC-Win-M9.woff2') format('woff2'),
+         url('/fonts/NIS-JTC-Win-M9.ttf') format('truetype');
     font-display: swap;
 }
 
