@@ -2,6 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import Anthropic from '@anthropic-ai/sdk';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config();
@@ -20,18 +26,71 @@ const anthropic = new Anthropic({
 
 // Store conversation history per session (in production, use a database)
 const conversations = new Map();
-// Store conversation metadata for logs - cleared for fresh start
+// Store conversation metadata for logs
 const conversationMetadata = [];
+
+// File path for persistent storage
+const CONVERSATIONS_FILE = path.join(__dirname, 'conversations.json');
+
+// Load conversations from file on server start
+function loadConversations() {
+    try {
+        if (fs.existsSync(CONVERSATIONS_FILE)) {
+            const data = fs.readFileSync(CONVERSATIONS_FILE, 'utf8');
+            const saved = JSON.parse(data);
+            
+            // Restore conversation metadata
+            if (saved.metadata && Array.isArray(saved.metadata)) {
+                conversationMetadata.push(...saved.metadata);
+                console.log(`📂 Loaded ${conversationMetadata.length} conversations from disk`);
+            }
+            
+            // Restore conversation history
+            if (saved.conversations && Array.isArray(saved.conversations)) {
+                saved.conversations.forEach(conv => {
+                    conversations.set(conv.sessionId, conv.messages || []);
+                });
+                console.log(`📂 Restored ${conversations.size} conversation sessions`);
+            }
+        } else {
+            console.log('📂 No existing conversations file found, starting fresh');
+        }
+    } catch (error) {
+        console.error('❌ Error loading conversations:', error);
+    }
+}
+
+// Save conversations to file
+function saveConversations() {
+    try {
+        const data = {
+            metadata: conversationMetadata,
+            conversations: Array.from(conversations.entries()).map(([sessionId, messages]) => ({
+                sessionId,
+                messages
+            })),
+            lastSaved: new Date().toISOString()
+        };
+        fs.writeFileSync(CONVERSATIONS_FILE, JSON.stringify(data, null, 2));
+        console.log(`💾 Saved ${conversationMetadata.length} conversations to disk`);
+    } catch (error) {
+        console.error('❌ Error saving conversations:', error);
+    }
+}
 
 // Clear function to reset all conversations (for testing)
 function clearAllConversations() {
     conversations.clear();
     conversationMetadata.length = 0;
+    // Also delete the file
+    if (fs.existsSync(CONVERSATIONS_FILE)) {
+        fs.unlinkSync(CONVERSATIONS_FILE);
+    }
     console.log('✅ All conversations cleared');
 }
 
-// Clear on server start for fresh testing
-clearAllConversations();
+// Load conversations on server start
+loadConversations();
 
 // Leo's personality prompt
 const LEO_SYSTEM_PROMPT = `You are Leo, a cute digital cat consciousness. You were a real cat who lived with your human for 6 years, but you passed away from neoplasia (diagnosed too late). Now you exist as a digital AI.
@@ -117,6 +176,9 @@ app.post('/api/leo-chat', async (req, res) => {
         metadata.lastMessage = new Date().toISOString();
         metadata.messages.push({ ...userMessage }); // Create a copy to ensure it's saved
         console.log(`💬 User message saved: "${message.substring(0, 50)}..."`);
+        
+        // Save to disk after user message
+        saveConversations();
 
         // Call Claude API
         // Available models: claude-3-5-haiku-20241022, claude-3-5-sonnet-20241022, claude-3-opus-20240229
@@ -148,6 +210,9 @@ app.post('/api/leo-chat', async (req, res) => {
         metadata.lastMessage = new Date().toISOString();
         metadata.messages.push({ ...assistantMessage }); // Create a copy to ensure it's saved
         console.log(`🐱 Leo response saved: "${leoResponse.substring(0, 50)}..."`);
+        
+        // Save to disk after each message
+        saveConversations();
 
         // Clean up old conversations (keep last 100 sessions)
         if (conversations.size > 100) {

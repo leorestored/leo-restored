@@ -68,6 +68,32 @@ __/\\\________/\\\______________________________________________________________
             font-size: 2vh;
             color: var(--lcd-color);
             opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 1.5vh;
+            justify-content: space-between;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8vh;
+            padding: 0.4vh 1vh;
+            background: #4CAF50;
+            color: white;
+            font-size: 1.6vh;
+            font-weight: bold;
+            border: 0.3vh solid #4CAF50;
+            pointer-events: none;
+        }
+
+        .live-indicator::before {
+            content: '';
+            width: 0.8vh;
+            height: 0.8vh;
+            background: white;
+            border-radius: 50%;
+            display: inline-block;
         }
 
         .stats-grid {
@@ -197,15 +223,6 @@ __/\\\________/\\\______________________________________________________________
             font-family: 'EVA', monospace;
         }
 
-        .conversation-status {
-            display: inline-block;
-            padding: 0.3vh 1vh;
-            background: #4CAF50;
-            color: white;
-            font-size: 1.2vh;
-            margin-bottom: 1vh;
-            text-transform: uppercase;
-        }
 
         .conversation-preview {
             color: var(--lcd-color);
@@ -409,7 +426,10 @@ __/\\\________/\\\______________________________________________________________
     <div class="logs-container">
         <div class="logs-header">
             <h1>Conversation Logs</h1>
-            <p>Browse and search public conversations with Leo</p>
+            <p>
+                Browse and search public conversations with Leo
+                <span class="live-indicator">LIVE</span>
+            </p>
         </div>
 
         <div class="stats-grid">
@@ -501,6 +521,9 @@ __/\\\________/\\\______________________________________________________________
             allConversations = newConversations;
             filteredConversations = [...allConversations];
             
+            // Update stats first
+            updateStats();
+            
             // Apply current filters
             filterConversations();
         } catch (error) {
@@ -555,24 +578,42 @@ __/\\\________/\\\______________________________________________________________
 
     function updateStats() {
         const total = allConversations.length;
-        const totalMessages = allConversations.reduce((sum, conv) => sum + conv.messageCount, 0);
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const todayChats = allConversations.filter(conv => new Date(conv.lastMessage) >= today).length;
+        const totalMessages = allConversations.reduce((sum, conv) => sum + (conv.messageCount || 0), 0);
+        
+        // Calculate today's chats using local timezone
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        today.setHours(0, 0, 0, 0);
+        
+        const todayChats = allConversations.filter(conv => {
+            if (!conv.lastMessage) return false;
+            const convDate = new Date(conv.lastMessage);
+            const convLocalDate = new Date(convDate.getFullYear(), convDate.getMonth(), convDate.getDate());
+            return convLocalDate >= today;
+        }).length;
 
-        document.getElementById('total-conversations').textContent = total;
-        document.getElementById('total-messages').textContent = totalMessages;
-        document.getElementById('today-chats').textContent = todayChats;
+        // Update DOM elements
+        const totalEl = document.getElementById('total-conversations');
+        const messagesEl = document.getElementById('total-messages');
+        const todayEl = document.getElementById('today-chats');
+        
+        if (totalEl) totalEl.textContent = total;
+        if (messagesEl) messagesEl.textContent = totalMessages;
+        if (todayEl) todayEl.textContent = todayChats;
+        
+        console.log(`📊 Stats updated: ${total} conversations, ${totalMessages} messages, ${todayChats} today`);
     }
 
     function formatDate(dateString) {
+        // Convert to user's local timezone
         const date = new Date(dateString);
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        // Use local time methods (getDate, getMonth, etc. automatically use local timezone)
         const day = date.getDate();
         const month = months[date.getMonth()];
         const year = date.getFullYear();
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0'); // getHours() returns local time
+        const minutes = String(date.getMinutes()).padStart(2, '0'); // getMinutes() returns local time
         return `${day} ${month} ${year}, ${hours}:${minutes}`;
     }
 
@@ -587,7 +628,6 @@ __/\\\________/\\\______________________________________________________________
             card.className = 'conversation-card';
             card.innerHTML = `
                 <div class="conversation-id">${conv.id}</div>
-                <div class="conversation-status">${conv.status}</div>
                 <div class="conversation-preview">${conv.firstMessage}</div>
                 <div class="conversation-meta">
                     <span>${conv.messageCount} message${conv.messageCount !== 1 ? 's' : ''}</span>
