@@ -1,0 +1,773 @@
+<!--
+
+__/\\\________/\\\_______________________________________________________________/\\\\\__________/\\\\\\\\\\\___        (C) COPYRIGHT 1995-2025 	S.T.U.L.T. KORPORATION, LLC.
+ _\/\\\_____/\\\//______________________________________________________________/\\\///\\\______/\\\/////////\\\_       (R) REGISTERED TRADEMARK	ANTONIUS SYNDICATE
+  _\/\\\__/\\\//______________________/\\\__/\\\___/\\\\\\\\\______/\\\________/\\\/__\///\\\___\//\\\______\///__      
+   _\/\\\\\\//\\\______/\\/\\\\\\\____\//\\\/\\\___/\\\/////\\\__/\\\\\\\\\\\__/\\\______\//\\\___\////\\\_________     > VERSION β 20.2.5
+    _\/\\\//_\//\\\____\/\\\/////\\\____\//\\\\\___\/\\\\\\\\\\__\////\\\////__\/\\\_______\/\\\______\////\\\______    
+     _\/\\\____\//\\\___\/\\\___\///______\//\\\____\/\\\//////______\/\\\______\//\\\______/\\\__________\////\\\___   
+      _\/\\\_____\//\\\__\/\\\__________/\\_/\\\_____\/\\\____________\/\\\_/\\___\///\\\__/\\\_____/\\\______\//\\\__  
+       _\/\\\______\//\\\_\/\\\_________\//\\\\/______\/\\\____________\//\\\\\______\///\\\\\/_____\///\\\\\\\\\\\/___ 
+        _\///________\///__\///___________\////________\///______________\/////_________\/////_________\///////////_____
+
+-->
+
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>O:/></title>
+	<link href="index.css" rel="stylesheet" type="text/css" media="all">
+    <meta name="google" content="notranslate">
+    <link rel="icon" type="image/x-icon" href="../icon.png">
+        <!-- OpenGraphs Bloat -->
+        <meta property="og:title" content="ᕚ( /๏/ )ᕘ" />
+        <meta property="og:description" content="𝙰𝚌𝚌𝚎𝚜𝚜 𝚝𝚘 𝚝𝚑𝚎 𝙾:/ 𝚍𝚛𝚒𝚟𝚎 𝚒𝚜 𝚛𝚎𝚜𝚝𝚛𝚒𝚌𝚝𝚎𝚍 𝚝𝚘 𝙴𝙶𝙾 𝚝𝚒𝚎𝚛 𝚙𝚛𝚊𝚌𝚝𝚒𝚝𝚒𝚘𝚗𝚎𝚛𝚜." />
+        <meta property="og:url" content="https://kry.pt/o/" />
+        <meta property="og:image" content="https://kry.pt/o/banner.png" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="𝕂ℝ𝕐 • ℙ𝕋" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="ᕚ( /๏/ )ᕘ" />
+        <meta name="twitter:description" content="𝙰𝚌𝚌𝚎𝚜𝚜 𝚝𝚘 𝚝𝚑𝚎 𝙾:/ 𝚍𝚛𝚒𝚟𝚎 𝚒𝚜 𝚛𝚎𝚜𝚝𝚛𝚒𝚌𝚝𝚎𝚍 𝚝𝚘 𝙴𝙶𝙾 𝚝𝚒𝚎𝚛 𝚙𝚛𝚊𝚌𝚝𝚒𝚝𝚒𝚘𝚗𝚎𝚛𝚜." />
+        <meta name="twitter:image" content="https://kry.pt/o/banner.png" />
+        <meta name="twitter:site" content="@kryptware" />
+        <meta name="twitter:creator" content="@kryptonaut" />
+    <style>
+        body {
+            padding: 2vh;
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        .logs-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2vh;
+            padding-top: 6vh;
+            min-height: calc(100vh - 8vh);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .logs-header {
+            margin-bottom: 3vh;
+        }
+
+        .logs-header h1 {
+            font-size: 4vh;
+            margin-bottom: 1vh;
+            color: var(--lcd-color);
+            font-weight: bold;
+        }
+
+        .logs-header p {
+            font-size: 2vh;
+            color: var(--lcd-color);
+            opacity: 0.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2vh;
+            margin-bottom: 3vh;
+        }
+
+        .stat-card {
+            background: var(--lcd-color);
+            color: white;
+            padding: 2vh;
+            border: 0.5vh solid var(--lcd-color);
+            text-shadow: var(--bivert-text-shadow);
+        }
+
+        .stat-card .stat-label {
+            font-size: 1.5vh;
+            opacity: 0.8;
+            margin-bottom: 0.5vh;
+        }
+
+        .stat-card .stat-value {
+            font-size: 3vh;
+            font-weight: bold;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 2vh;
+            margin-bottom: 3vh;
+            flex-wrap: wrap;
+        }
+
+        .search-bar {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 1.5vh 1.5vh 1.5vh 5vh;
+            border: 0.5vh solid var(--lcd-color);
+            background: white;
+            color: var(--lcd-color);
+            font-family: 'meow';
+            font-size: 2vh;
+            outline: none;
+        }
+
+        .search-bar::before {
+            content: '🔍';
+            position: absolute;
+            left: 1.5vh;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2vh;
+        }
+
+        .filter-select {
+            padding: 1.5vh 2vh;
+            border: 0.5vh solid var(--lcd-color);
+            background: white;
+            color: var(--lcd-color);
+            font-family: 'meow';
+            font-size: 2vh;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .results-count {
+            margin-bottom: 2vh;
+            color: var(--lcd-color);
+            font-size: 2.2vh;
+            font-weight: bold;
+            min-height: 3vh;
+            display: block;
+        }
+
+        .conversations-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2vh;
+            margin-bottom: 4vh;
+            min-height: 400px;
+            width: 100%;
+        }
+
+        .conversations-grid:empty::after {
+            content: '';
+            grid-column: 1 / -1;
+            height: 100%;
+        }
+
+        @media (max-width: 1200px) {
+            .conversations-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 800px) {
+            .conversations-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .conversation-card {
+            background: white;
+            border: 0.5vh solid var(--lcd-color);
+            padding: 2vh;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .conversation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .conversation-id {
+            font-size: 2vh;
+            font-weight: bold;
+            color: var(--lcd-color);
+            margin-bottom: 1vh;
+            font-family: 'EVA', monospace;
+        }
+
+        .conversation-status {
+            display: inline-block;
+            padding: 0.3vh 1vh;
+            background: #4CAF50;
+            color: white;
+            font-size: 1.2vh;
+            margin-bottom: 1vh;
+            text-transform: uppercase;
+        }
+
+        .conversation-preview {
+            color: var(--lcd-color);
+            font-size: 2vh;
+            font-weight: bold;
+            margin-bottom: 1.5vh;
+            opacity: 0.9;
+            line-height: 1.4;
+            max-height: 4.5vh;
+            overflow: hidden;
+        }
+
+        .conversation-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.7vh;
+            font-weight: bold;
+            color: var(--lcd-color);
+            opacity: 0.8;
+            margin-bottom: 1vh;
+        }
+
+        .conversation-date {
+            font-size: 1.7vh;
+            font-weight: bold;
+            color: var(--lcd-color);
+            opacity: 0.8;
+        }
+
+        .conversation-actions {
+            display: flex;
+            gap: 1vh;
+            justify-content: flex-end;
+            margin-top: 1.5vh;
+        }
+
+        .action-btn {
+            padding: 0.8vh 1.5vh;
+            border: 0.3vh solid var(--lcd-color);
+            background: white;
+            color: var(--lcd-color);
+            font-family: 'meow';
+            font-size: 1.5vh;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .action-btn:hover {
+            background: var(--lcd-color);
+            color: white;
+            text-shadow: var(--bivert-text-shadow);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 4vh;
+        }
+
+        .back-link-container {
+            display: inline-block;
+            background: var(--lcd-color);
+            padding: 0.5vh;
+            filter: drop-shadow(var(--shadow) var(--shadow) var(--shadow-color));
+            opacity: 0;
+            animation: lcd-flicker-on 0.5s step-start forwards;
+        }
+
+        .back-link a {
+            font-size: 0.8em;
+            opacity: 0.7;
+            color: white;
+            border: 0.5vh solid white;
+            padding: 0.5vh 1vh 0 1.5vh;
+            box-shadow:
+                inset calc(-1 * var(--shadow)) calc(-1 * var(--shadow)) var(--shadow-color),
+                var(--bivert-text-shadow);
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-link a:hover {
+            border: none;
+            font-weight: bold;
+            background: white;
+            color: #626262;
+            text-shadow: var(--invert-text-shadow);
+            box-shadow: inset var(--shadow) var(--shadow) var(--shadow-color);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        .modal-content {
+            background: white;
+            border: 0.5vh solid var(--lcd-color);
+            padding: 3vh;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            width: 90%;
+            margin: 5vh auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2vh;
+        }
+
+        .modal-header h2 {
+            color: var(--lcd-color);
+            font-size: 2vh;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: var(--lcd-color);
+            color: white;
+            border: none;
+            padding: 1vh 2vh;
+            cursor: pointer;
+            font-family: 'meow';
+            font-size: 1.8vh;
+        }
+
+        .message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+        }
+
+        .message {
+            padding: 2vh;
+            border: 0.5vh solid var(--lcd-color);
+            position: relative;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 70%;
+            margin-bottom: 1.5vh;
+        }
+
+        .message.user {
+            background: white;
+            color: var(--lcd-color);
+            text-align: right;
+            margin-left: auto;
+            border: 0.5vh solid var(--lcd-color);
+        }
+
+        .message.leo {
+            background: var(--lcd-color);
+            color: white;
+            text-align: left;
+            margin-right: auto;
+            border: 0.5vh solid var(--lcd-color);
+        }
+
+        .message-role {
+            font-size: 1.3vh;
+            opacity: 1;
+            margin-bottom: 1vh;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+
+        .message-content {
+            font-size: 2vh;
+            line-height: 1.5;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="flex">
+    <button id="copy-address" class="copy-button" data-full-text="FKMdhDBjirErUMQbffsZiuvjptSwNnFW7kf6fvpTpump"></button>
+    <div class="logs-container">
+        <div class="logs-header">
+            <h1>Conversation Logs</h1>
+            <p>Browse and search public conversations with Leo</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">TOTAL</div>
+                <div class="stat-value" id="total-conversations">0</div>
+                <div class="stat-label">conversations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">MESSAGES</div>
+                <div class="stat-value" id="total-messages">0</div>
+                <div class="stat-label">total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">TODAY</div>
+                <div class="stat-value" id="today-chats">0</div>
+                <div class="stat-label">chats</div>
+            </div>
+        </div>
+
+        <div class="search-filters">
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search by log number or content...">
+            </div>
+            <select class="filter-select" id="time-filter">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+            </select>
+            <select class="filter-select" id="sort-filter">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="most-messages">Most Messages</option>
+            </select>
+        </div>
+
+        <div class="results-count" id="results-count">0 conversations found</div>
+
+        <div class="conversations-grid" id="conversations-grid">
+            <!-- Conversation cards will be inserted here -->
+        </div>
+
+        <div class="back-link">
+            <div class="back-link-container">
+                <a href="second.html">← back</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for viewing conversation -->
+    <div class="modal" id="conversation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Conversation</h2>
+                <button class="close-btn" onclick="closeModal()">Close</button>
+            </div>
+            <div class="message-list" id="modal-messages">
+                <!-- Messages will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+<svg width="0" height="0">
+	<filter id="pixelate" x="0" y="0">
+		<feFlood x="4" y="4" height="0.5" width="0.5" />
+		<feComposite width="2" height="2" />
+		<feTile result="a" />
+		<feComposite in="SourceGraphic" in2="a" operator="in" />
+		<feMorphology operator="dilate" radius="1" />
+	</filter>
+</svg>
+<script>
+    let allConversations = [];
+    let filteredConversations = [];
+
+    // Fetch conversations from API
+    async function fetchConversations() {
+        try {
+            const response = await fetch('/api/conversations');
+            const data = await response.json();
+            const newConversations = data.conversations || [];
+            
+            // Check if we have new conversations
+            if (newConversations.length !== allConversations.length) {
+                console.log(`🔄 Found ${newConversations.length} conversations (was ${allConversations.length})`);
+            }
+            
+            allConversations = newConversations;
+            filteredConversations = [...allConversations];
+            
+            // Apply current filters
+            filterConversations();
+        } catch (error) {
+            console.error('Error fetching conversations:', error);
+            allConversations = [];
+            filteredConversations = [];
+            updateStats();
+            renderConversations();
+        }
+    }
+
+    // Generate mock data for testing
+    function generateMockData() {
+        const mock = [];
+        const now = new Date();
+        for (let i = 0; i < 20; i++) {
+            const date = new Date(now - i * 3600000); // 1 hour apart
+            const id = `#LEO-${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}-${String(date.getHours()).padStart(2,'0')}${String(date.getMinutes()).padStart(2,'0')}${String(date.getSeconds()).padStart(2,'0')}-${String(i).padStart(3,'0')}`;
+            const messages = Math.floor(Math.random() * 10) + 1;
+            const firstMessages = ['hi', 'hello', 'what is leo?', 'tell me about yourself', 'hey leo', 'can you help me?', 'how are you?', 'what do you do?'];
+            mock.push({
+                id: id,
+                sessionId: `session-${i}`,
+                status: 'ACTIVE',
+                firstMessage: firstMessages[Math.floor(Math.random() * firstMessages.length)],
+                messageCount: messages,
+                duration: Math.floor(Math.random() * 60) + 1,
+                lastMessage: date.toISOString(),
+                messages: Array.from({length: messages}, (_, j) => {
+                    const isUser = j % 2 === 0;
+                    const firstMsg = firstMessages[Math.floor(Math.random() * firstMessages.length)];
+                    let content;
+                    if (j === 0) {
+                        content = firstMsg;
+                    } else if (isUser) {
+                        const userMessages = ['tell me more', 'interesting', 'what else?', 'cool', 'thanks', 'ok', 'got it'];
+                        content = userMessages[Math.floor(Math.random() * userMessages.length)];
+                    } else {
+                        const leoMessages = ['oh that\'s cool! (^•⩊•^)', 'hmm interesting', 'yeah that makes sense', 'i don\'t know much about that but it sounds neat', '₍^•⩊•^₎'];
+                        content = leoMessages[Math.floor(Math.random() * leoMessages.length)];
+                    }
+                    return {
+                        role: isUser ? 'user' : 'assistant',
+                        content: content,
+                        timestamp: new Date(date.getTime() + j * 60000).toISOString()
+                    };
+                })
+            });
+        }
+        return mock;
+    }
+
+    function updateStats() {
+        const total = allConversations.length;
+        const totalMessages = allConversations.reduce((sum, conv) => sum + conv.messageCount, 0);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const todayChats = allConversations.filter(conv => new Date(conv.lastMessage) >= today).length;
+
+        document.getElementById('total-conversations').textContent = total;
+        document.getElementById('total-messages').textContent = totalMessages;
+        document.getElementById('today-chats').textContent = todayChats;
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const day = date.getDate();
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${day} ${month} ${year}, ${hours}:${minutes}`;
+    }
+
+    function renderConversations() {
+        const grid = document.getElementById('conversations-grid');
+        grid.innerHTML = '';
+
+        document.getElementById('results-count').textContent = `${filteredConversations.length} conversations found`;
+
+        filteredConversations.forEach(conv => {
+            const card = document.createElement('div');
+            card.className = 'conversation-card';
+            card.innerHTML = `
+                <div class="conversation-id">${conv.id}</div>
+                <div class="conversation-status">${conv.status}</div>
+                <div class="conversation-preview">${conv.firstMessage}</div>
+                <div class="conversation-meta">
+                    <span>${conv.messageCount} message${conv.messageCount !== 1 ? 's' : ''}</span>
+                    <span>${conv.duration}s</span>
+                </div>
+                <div class="conversation-date">${formatDate(conv.lastMessage)}</div>
+                <div class="conversation-actions">
+                    <button class="action-btn" onclick="viewConversation('${conv.sessionId}')">View</button>
+                    <button class="action-btn" onclick="downloadConversation('${conv.sessionId}')">Download</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function viewConversation(sessionId) {
+        const conv = allConversations.find(c => c.sessionId === sessionId);
+        if (!conv) return;
+
+        document.getElementById('modal-title').textContent = conv.id;
+        const messagesDiv = document.getElementById('modal-messages');
+        messagesDiv.innerHTML = '';
+
+        // Ensure messages array exists and has content
+        if (!conv.messages || conv.messages.length === 0) {
+            messagesDiv.innerHTML = '<div class="message leo"><div class="message-content">No messages found in this conversation.</div></div>';
+        } else {
+            conv.messages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message ${msg.role}`;
+                const roleLabel = msg.role === 'user' ? 'USER' : 'LEO';
+                const content = msg.content || 'No content';
+                msgDiv.innerHTML = `
+                    <div class="message-role">${roleLabel}</div>
+                    <div class="message-content">${content}</div>
+                `;
+                messagesDiv.appendChild(msgDiv);
+            });
+        }
+
+        document.getElementById('conversation-modal').classList.add('active');
+        document.body.classList.add('modal-open');
+    }
+
+    function closeModal() {
+        document.getElementById('conversation-modal').classList.remove('active');
+        document.body.classList.remove('modal-open');
+    }
+
+    function downloadConversation(sessionId) {
+        const conv = allConversations.find(c => c.sessionId === sessionId);
+        if (!conv) return;
+
+        const content = `Conversation: ${conv.id}\nDate: ${formatDate(conv.lastMessage)}\n\n${conv.messages.map(msg => {
+            const roleLabel = msg.role === 'user' ? 'USER' : 'LEO';
+            return `${roleLabel}: ${msg.content}`;
+        }).join('\n\n')}`;
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${conv.id.replace('#', '')}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function filterConversations() {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+        const timeFilter = document.getElementById('time-filter').value;
+        const sortFilter = document.getElementById('sort-filter').value;
+
+        filteredConversations = allConversations.filter(conv => {
+            const matchesSearch = conv.id.toLowerCase().includes(searchTerm) || 
+                                 conv.firstMessage.toLowerCase().includes(searchTerm);
+            
+            if (!matchesSearch) return false;
+
+            if (timeFilter === 'all') return true;
+            
+            const convDate = new Date(conv.lastMessage);
+            const now = new Date();
+            
+            if (timeFilter === 'today') {
+                const today = new Date(now);
+                today.setHours(0,0,0,0);
+                return convDate >= today;
+            }
+            if (timeFilter === 'week') {
+                const weekAgo = new Date(now);
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return convDate >= weekAgo;
+            }
+            if (timeFilter === 'month') {
+                const monthAgo = new Date(now);
+                monthAgo.setMonth(monthAgo.getMonth() - 1);
+                return convDate >= monthAgo;
+            }
+            
+            return true;
+        });
+
+        // Sort
+        filteredConversations.sort((a, b) => {
+            if (sortFilter === 'newest') {
+                return new Date(b.lastMessage) - new Date(a.lastMessage);
+            }
+            if (sortFilter === 'oldest') {
+                return new Date(a.lastMessage) - new Date(b.lastMessage);
+            }
+            if (sortFilter === 'most-messages') {
+                return b.messageCount - a.messageCount;
+            }
+            return 0;
+        });
+
+        renderConversations();
+    }
+
+    // Event listeners
+    document.getElementById('search-input').addEventListener('input', filterConversations);
+    document.getElementById('time-filter').addEventListener('change', filterConversations);
+    document.getElementById('sort-filter').addEventListener('change', filterConversations);
+
+    // Close modal on outside click
+    const modal = document.getElementById('conversation-modal');
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Prevent modal content clicks from closing modal
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+
+    // Copy address button functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButton = document.getElementById('copy-address');
+        if (copyButton) {
+            const fullText = copyButton.getAttribute('data-full-text');
+            const firstSix = fullText.substring(0, 6);
+            const displayText = 'ca: ' + firstSix + '...pump';
+            copyButton.textContent = displayText;
+            
+            copyButton.addEventListener('click', function() {
+                navigator.clipboard.writeText(fullText).then(function() {
+                    copyButton.textContent = 'copied!';
+                    setTimeout(function() {
+                        copyButton.textContent = displayText;
+                    }, 1000);
+                }).catch(function(err) {
+                    console.error('Failed to copy:', err);
+                });
+            });
+        }
+
+        fetchConversations();
+        
+        // Auto-refresh conversations every 3 seconds
+        setInterval(fetchConversations, 3000);
+    });
+
+    // Prevent scrolling past the bottom
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const maxScroll = scrollHeight - clientHeight;
+        
+        if (scrollTop > maxScroll) {
+            window.scrollTo(0, maxScroll);
+        }
+        lastScrollTop = scrollTop;
+    }, { passive: false });
+</script>
+</body>
+</html>
+
