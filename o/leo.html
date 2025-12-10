@@ -207,8 +207,10 @@
         // This ensures each page visit creates a new conversation
         const sessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
-        // API endpoint - change this to your server URL
-        const API_URL = 'http://localhost:3000/api/leo-chat';
+        // API endpoint - automatically detect if running on Render or locally
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000/api/leo-chat'
+            : `${window.location.protocol}//${window.location.host}/api/leo-chat`;
 
         // Add welcome message (always show for new conversation)
         addMessage('leo', 'hello! ₍^•⩊•^₎ i\'m leo, ask me anything!');
