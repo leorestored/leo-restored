@@ -60,22 +60,31 @@ function loadConversations() {
     }
 }
 
-// Save conversations to file
+// Debounced save function to avoid too frequent disk writes
+let saveTimeout = null;
 function saveConversations() {
-    try {
-        const data = {
-            metadata: conversationMetadata,
-            conversations: Array.from(conversations.entries()).map(([sessionId, messages]) => ({
-                sessionId,
-                messages
-            })),
-            lastSaved: new Date().toISOString()
-        };
-        fs.writeFileSync(CONVERSATIONS_FILE, JSON.stringify(data, null, 2));
-        console.log(`💾 Saved ${conversationMetadata.length} conversations to disk`);
-    } catch (error) {
-        console.error('❌ Error saving conversations:', error);
+    // Clear existing timeout
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
     }
+    
+    // Debounce: save after 2 seconds of no new messages
+    saveTimeout = setTimeout(() => {
+        try {
+            const data = {
+                metadata: conversationMetadata,
+                conversations: Array.from(conversations.entries()).map(([sessionId, messages]) => ({
+                    sessionId,
+                    messages
+                })),
+                lastSaved: new Date().toISOString()
+            };
+            fs.writeFileSync(CONVERSATIONS_FILE, JSON.stringify(data, null, 2));
+            console.log(`💾 Saved ${conversationMetadata.length} conversations to disk`);
+        } catch (error) {
+            console.error('❌ Error saving conversations:', error);
+        }
+    }, 2000); // Wait 2 seconds before saving
 }
 
 // Clear function to reset all conversations (for testing)
@@ -154,6 +163,8 @@ app.post('/api/leo-chat', async (req, res) => {
             };
             conversationMetadata.push(newMetadata);
             console.log(`📝 New conversation created: ${conversationId}`);
+            // Save new conversation to disk
+            saveConversations();
         }
         const conversationHistory = conversations.get(sessionId);
         const metadata = conversationMetadata.find(m => m.sessionId === sessionId);
