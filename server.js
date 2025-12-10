@@ -312,8 +312,8 @@ app.post('/api/conversations/clear', (req, res) => {
 // Serve static files (HTML, CSS, images, etc.) - MUST be after API routes
 app.use(express.static('.'));
 
-app.listen(PORT, () => {
-    console.log(`🐱 Leo chat server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🐱 Leo chat server running on port ${PORT}`);
     console.log(`Make sure your ANTHROPIC_API_KEY is set in .env`);
 });
 
