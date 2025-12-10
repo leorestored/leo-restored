@@ -245,7 +245,7 @@
 
                 const data = await response.json();
                 return data.response;
-            } catch (error) {
+            } catch (error) { // Further fallback error handling
                 console.error('Error:', error);
                 // Fallback response if API fails
                 return 'oops, something went wrong... ₍^•⩊•^₎ try again?';
