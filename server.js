@@ -309,7 +309,40 @@ app.post('/api/conversations/clear', (req, res) => {
     res.json({ status: 'ok', message: 'All conversations cleared' });
 });
 
-// Serve static files (HTML, CSS, images, etc.) - MUST be after API routes
+// Clean URL routes - MUST be before static file serving
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/enter', (req, res) => {
+    res.sendFile(path.join(__dirname, 'o', 'first.html'));
+});
+
+app.get('/menu', (req, res) => {
+    res.sendFile(path.join(__dirname, 'o', 'second.html'));
+});
+
+app.get('/chat', (req, res) => {
+    res.sendFile(path.join(__dirname, 'o', 'leo.html'));
+});
+
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'o', 'about.html'));
+});
+
+app.get('/logs', (req, res) => {
+    res.sendFile(path.join(__dirname, 'o', 'logs.html'));
+});
+
+app.get('/challenges', (req, res) => {
+    res.sendFile(path.join(__dirname, 'o', 'challenges.html'));
+});
+
+app.get('/donations', (req, res) => {
+    res.sendFile(path.join(__dirname, 'o', 'donations.html'));
+});
+
+// Serve static files (CSS, images, etc.) - MUST be after API routes and URL routes
 app.use(express.static('.'));
 
 app.listen(PORT, '0.0.0.0', () => {
