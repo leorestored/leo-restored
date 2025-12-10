@@ -60,16 +60,15 @@ function loadConversations() {
     }
 }
 
-// Debounced save function to avoid too frequent disk writes
+// Save function - save immediately to prevent data loss on spin-down
 let saveTimeout = null;
-function saveConversations() {
+function saveConversations(immediate = false) {
     // Clear existing timeout
     if (saveTimeout) {
         clearTimeout(saveTimeout);
     }
     
-    // Debounce: save after 2 seconds of no new messages
-    saveTimeout = setTimeout(() => {
+    const saveNow = () => {
         try {
             const data = {
                 metadata: conversationMetadata,
@@ -84,7 +83,14 @@ function saveConversations() {
         } catch (error) {
             console.error('❌ Error saving conversations:', error);
         }
-    }, 2000); // Wait 2 seconds before saving
+    };
+    
+    if (immediate) {
+        saveNow();
+    } else {
+        // Debounce: save after 1 second of no new messages (reduced from 2 seconds)
+        saveTimeout = setTimeout(saveNow, 1000);
+    }
 }
 
 // Clear function to reset all conversations (for testing)
@@ -164,7 +170,7 @@ app.post('/api/leo-chat', async (req, res) => {
             conversationMetadata.push(newMetadata);
             console.log(`📝 New conversation created: ${conversationId}`);
             // Save new conversation to disk
-            saveConversations();
+            saveConversations(true); // Immediate save for new conversation
         }
         const conversationHistory = conversations.get(sessionId);
         const metadata = conversationMetadata.find(m => m.sessionId === sessionId);
@@ -188,8 +194,8 @@ app.post('/api/leo-chat', async (req, res) => {
         metadata.messages.push({ ...userMessage }); // Create a copy to ensure it's saved
         console.log(`💬 User message saved: "${message.substring(0, 50)}..."`);
         
-        // Save to disk after user message
-        saveConversations();
+        // Save to disk after user message (immediate save to prevent data loss)
+        saveConversations(true);
 
         // Call Claude API
         // Available models: claude-3-5-haiku-20241022, claude-3-5-sonnet-20241022, claude-3-opus-20240229
@@ -345,8 +351,22 @@ app.get('/donations', (req, res) => {
 // Serve static files (CSS, images, etc.) - MUST be after API routes and URL routes
 app.use(express.static('.'));
 
+// Save conversations on server shutdown
+process.on('SIGTERM', () => {
+    console.log('🛑 SIGTERM received, saving conversations...');
+    saveConversations(true); // Immediate save
+    process.exit(0);
+});
+
+process.on('SIGINT', () => {
+    console.log('🛑 SIGINT received, saving conversations...');
+    saveConversations(true); // Immediate save
+    process.exit(0);
+});
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🐱 Leo chat server running on port ${PORT}`);
     console.log(`Make sure your ANTHROPIC_API_KEY is set in .env`);
+    console.log(`💾 Conversations file: ${CONVERSATIONS_FILE}`);
 });
 
