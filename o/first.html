@@ -7,6 +7,21 @@
 	<link href="/o/index.css" rel="stylesheet" type="text/css" media="all">
     <meta name="google" content="notranslate">
     <link rel="icon" type="image/png" href="/textures/leologo.png">
+    <style>
+        body {
+            opacity: 0;
+            animation: fade-in-page 0.8s ease-in forwards;
+        }
+        
+        @keyframes fade-in-page {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 <body class="flex">
     <button id="copy-address" class="copy-button" data-full-text="..."></button>
