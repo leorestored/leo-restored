@@ -392,6 +392,46 @@
             line-height: 1.5;
             font-weight: bold;
         }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2vh;
+            margin-top: 4vh;
+            margin-bottom: 2vh;
+        }
+
+        .pagination-btn {
+            padding: 1vh 2vh;
+            border: 0.5vh solid var(--lcd-color);
+            background: white;
+            color: var(--lcd-color);
+            font-family: 'meow';
+            font-size: 2vh;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--lcd-color);
+            color: white;
+            text-shadow: var(--bivert-text-shadow);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            color: var(--lcd-color);
+            font-size: 2vh;
+            font-weight: bold;
+            font-family: 'meow';
+        }
     </style>
 </head>
 <body class="flex">
@@ -446,6 +486,10 @@
             <!-- Conversation cards will be inserted here -->
         </div>
 
+        <div class="pagination" id="pagination">
+            <!-- Pagination controls will be inserted here -->
+        </div>
+
         <div class="back-link">
             <div class="back-link-container">
                 <a href="/menu">← back</a>
@@ -478,6 +522,8 @@
 <script>
     let allConversations = [];
     let filteredConversations = [];
+    let currentPage = 1;
+    const conversationsPerPage = 36;
 
     // Fetch conversations from API
     async function fetchConversations() {
@@ -601,9 +647,22 @@
             const grid = document.getElementById('conversations-grid');
             grid.innerHTML = '';
 
-            document.getElementById('results-count').textContent = `${filteredConversations.length} conversations found`;
+            const totalFiltered = filteredConversations.length;
+            const totalPages = Math.ceil(totalFiltered / conversationsPerPage);
+            
+            // Reset to page 1 if current page is out of bounds
+            if (currentPage > totalPages && totalPages > 0) {
+                currentPage = 1;
+            }
+            
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * conversationsPerPage;
+            const endIndex = startIndex + conversationsPerPage;
+            const paginatedConversations = filteredConversations.slice(startIndex, endIndex);
 
-            filteredConversations.forEach(conv => {
+            document.getElementById('results-count').textContent = `${totalFiltered} conversations found`;
+
+            paginatedConversations.forEach(conv => {
                 const card = document.createElement('div');
                 card.className = 'conversation-card';
                 card.innerHTML = `
@@ -621,7 +680,53 @@
                 `;
                 grid.appendChild(card);
             });
+
+            // Render pagination controls
+            renderPagination(totalFiltered, totalPages);
         }, 100); // Small delay to batch DOM updates
+    }
+
+    function renderPagination(totalFiltered, totalPages) {
+        const paginationEl = document.getElementById('pagination');
+        paginationEl.innerHTML = '';
+
+        if (totalPages <= 1) {
+            return; // Don't show pagination if there's only one page or no pages
+        }
+
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'pagination-btn';
+        prevBtn.textContent = '← Previous';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderConversations();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'pagination-btn';
+        nextBtn.textContent = 'Next →';
+        nextBtn.disabled = currentPage >= totalPages;
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderConversations();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        const infoEl = document.createElement('div');
+        infoEl.className = 'pagination-info';
+        const startItem = totalFiltered === 0 ? 0 : (currentPage - 1) * conversationsPerPage + 1;
+        const endItem = Math.min(currentPage * conversationsPerPage, totalFiltered);
+        infoEl.textContent = `Page ${currentPage} of ${totalPages} (${startItem}-${endItem} of ${totalFiltered})`;
+
+        paginationEl.appendChild(prevBtn);
+        paginationEl.appendChild(infoEl);
+        paginationEl.appendChild(nextBtn);
     }
 
     function viewConversation(sessionId) {
@@ -724,6 +829,8 @@
             return 0;
         });
 
+        // Reset to page 1 when filters change
+        currentPage = 1;
         renderConversations();
     }
 
