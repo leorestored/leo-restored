@@ -537,7 +537,8 @@
                 console.log(`🔄 Found ${newConversations.length} conversations (was ${allConversations.length})`);
             }
             
-            allConversations = newConversations;
+            // Filter out any invalid conversations
+            allConversations = newConversations.filter(c => c && c.sessionId);
             filteredConversations = [...allConversations];
             
             // Update stats first
@@ -596,8 +597,11 @@
     }
 
     function updateStats() {
-        const total = allConversations.length;
-        const totalMessages = allConversations.reduce((sum, conv) => sum + (conv.messageCount || 0), 0);
+        const total = allConversations.filter(c => c).length; // Only count valid conversations
+        const totalMessages = allConversations.reduce((sum, conv) => {
+            if (!conv) return sum;
+            return sum + (conv.messageCount || 0);
+        }, 0);
         
         // Calculate today's chats using local timezone
         const now = new Date();
@@ -605,8 +609,9 @@
         today.setHours(0, 0, 0, 0);
         
         const todayChats = allConversations.filter(conv => {
-            if (!conv.lastMessage) return false;
+            if (!conv || !conv.lastMessage) return false;
             const convDate = new Date(conv.lastMessage);
+            if (isNaN(convDate.getTime())) return false; // Invalid date
             const convLocalDate = new Date(convDate.getFullYear(), convDate.getMonth(), convDate.getDate());
             return convLocalDate >= today;
         }).length;
@@ -623,9 +628,25 @@
         console.log(`📊 Stats updated: ${total} conversations, ${totalMessages} messages, ${todayChats} today`);
     }
 
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        if (text == null) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     function formatDate(dateString) {
+        if (!dateString) return 'Unknown date';
+        
         // Convert to user's local timezone
         const date = new Date(dateString);
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            return 'Invalid date';
+        }
+        
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         // Use local time methods (getDate, getMonth, etc. automatically use local timezone)
         const day = date.getDate();
@@ -663,19 +684,28 @@
             document.getElementById('results-count').textContent = `${totalFiltered} conversations found`;
 
             paginatedConversations.forEach(conv => {
+                if (!conv || !conv.sessionId) return; // Skip invalid conversations
+                
                 const card = document.createElement('div');
                 card.className = 'conversation-card';
+                const convId = conv.id || 'Unknown';
+                const firstMsg = conv.firstMessage || '(no message)';
+                const msgCount = conv.messageCount || 0;
+                const duration = conv.duration || 0;
+                const lastMsg = conv.lastMessage || new Date().toISOString();
+                const sessionId = conv.sessionId || '';
+                
                 card.innerHTML = `
-                    <div class="conversation-id">${conv.id}</div>
-                    <div class="conversation-preview">${conv.firstMessage}</div>
+                    <div class="conversation-id">${escapeHtml(convId)}</div>
+                    <div class="conversation-preview">${escapeHtml(firstMsg)}</div>
                     <div class="conversation-meta">
-                        <span>${conv.messageCount} message${conv.messageCount !== 1 ? 's' : ''}</span>
-                        <span>${conv.duration}s</span>
+                        <span>${msgCount} message${msgCount !== 1 ? 's' : ''}</span>
+                        <span>${duration}s</span>
                     </div>
-                    <div class="conversation-date">${formatDate(conv.lastMessage)}</div>
+                    <div class="conversation-date">${formatDate(lastMsg)}</div>
                     <div class="conversation-actions">
-                        <button class="action-btn" onclick="viewConversation('${conv.sessionId}')">View</button>
-                        <button class="action-btn" onclick="downloadConversation('${conv.sessionId}')">Download</button>
+                        <button class="action-btn" onclick="viewConversation('${escapeHtml(sessionId)}')">View</button>
+                        <button class="action-btn" onclick="downloadConversation('${escapeHtml(sessionId)}')">Download</button>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -730,31 +760,48 @@
     }
 
     function viewConversation(sessionId) {
-        const conv = allConversations.find(c => c.sessionId === sessionId);
-        if (!conv) return;
+        if (!sessionId) return;
+        
+        const conv = allConversations.find(c => c && c.sessionId === sessionId);
+        if (!conv) {
+            console.error('Conversation not found:', sessionId);
+            return;
+        }
 
-        document.getElementById('modal-title').textContent = conv.id;
+        const modalTitle = document.getElementById('modal-title');
+        if (modalTitle) {
+            modalTitle.textContent = conv.id || 'Conversation';
+        }
+        
         const messagesDiv = document.getElementById('modal-messages');
+        if (!messagesDiv) return;
+        
         messagesDiv.innerHTML = '';
 
         // Ensure messages array exists and has content
-        if (!conv.messages || conv.messages.length === 0) {
+        if (!conv.messages || !Array.isArray(conv.messages) || conv.messages.length === 0) {
             messagesDiv.innerHTML = '<div class="message leo"><div class="message-content">No messages found in this conversation.</div></div>';
         } else {
             conv.messages.forEach(msg => {
+                if (!msg) return;
+                
                 const msgDiv = document.createElement('div');
-                msgDiv.className = `message ${msg.role}`;
-                const roleLabel = msg.role === 'user' ? 'USER' : 'LEO';
+                msgDiv.className = `message ${msg.role || 'assistant'}`;
+                const roleLabel = (msg.role === 'user') ? 'USER' : 'LEO';
                 const content = msg.content || 'No content';
+                
                 msgDiv.innerHTML = `
                     <div class="message-role">${roleLabel}</div>
-                    <div class="message-content">${content}</div>
+                    <div class="message-content">${escapeHtml(content)}</div>
                 `;
                 messagesDiv.appendChild(msgDiv);
             });
         }
 
-        document.getElementById('conversation-modal').classList.add('active');
+        const modal = document.getElementById('conversation-modal');
+        if (modal) {
+            modal.classList.add('active');
+        }
         document.body.classList.add('modal-open');
     }
 
@@ -764,18 +811,30 @@
     }
 
     function downloadConversation(sessionId) {
-        const conv = allConversations.find(c => c.sessionId === sessionId);
-        if (!conv) return;
+        if (!sessionId) return;
+        
+        const conv = allConversations.find(c => c && c.sessionId === sessionId);
+        if (!conv) {
+            console.error('Conversation not found:', sessionId);
+            return;
+        }
 
-        const content = `Conversation: ${conv.id}\nDate: ${formatDate(conv.lastMessage)}\n\n${conv.messages.map(msg => {
-            const roleLabel = msg.role === 'user' ? 'USER' : 'LEO';
-            return `${roleLabel}: ${msg.content}`;
-        }).join('\n\n')}`;
+        const convId = conv.id || 'Unknown';
+        const lastMsg = conv.lastMessage || new Date().toISOString();
+        const messages = (conv.messages && Array.isArray(conv.messages)) ? conv.messages : [];
+        
+        const content = `Conversation: ${convId}\nDate: ${formatDate(lastMsg)}\n\n${messages.map(msg => {
+            if (!msg) return '';
+            const roleLabel = (msg.role === 'user') ? 'USER' : 'LEO';
+            const msgContent = msg.content || '(no content)';
+            return `${roleLabel}: ${msgContent}`;
+        }).filter(msg => msg !== '').join('\n\n')}`;
+        
         const blob = new Blob([content], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${conv.id.replace('#', '')}.txt`;
+        a.download = `${(convId || 'conversation').replace('#', '')}.txt`;
         a.click();
         URL.revokeObjectURL(url);
     }
@@ -786,14 +845,23 @@
         const sortFilter = document.getElementById('sort-filter').value;
 
         filteredConversations = allConversations.filter(conv => {
-            const matchesSearch = conv.id.toLowerCase().includes(searchTerm) || 
-                                 conv.firstMessage.toLowerCase().includes(searchTerm);
+            if (!conv) return false;
+            
+            // Safe search - check if properties exist before calling toLowerCase
+            const convId = (conv.id || '').toLowerCase();
+            const firstMsg = (conv.firstMessage || '').toLowerCase();
+            const matchesSearch = convId.includes(searchTerm) || firstMsg.includes(searchTerm);
             
             if (!matchesSearch) return false;
 
             if (timeFilter === 'all') return true;
             
+            // Check if lastMessage exists and is valid
+            if (!conv.lastMessage) return false;
+            
             const convDate = new Date(conv.lastMessage);
+            if (isNaN(convDate.getTime())) return false; // Invalid date
+            
             const now = new Date();
             
             if (timeFilter === 'today') {
@@ -815,16 +883,26 @@
             return true;
         });
 
-        // Sort
+        // Sort with null safety
         filteredConversations.sort((a, b) => {
             if (sortFilter === 'newest') {
-                return new Date(b.lastMessage) - new Date(a.lastMessage);
+                const dateA = a.lastMessage ? new Date(a.lastMessage).getTime() : 0;
+                const dateB = b.lastMessage ? new Date(b.lastMessage).getTime() : 0;
+                if (isNaN(dateA)) return 1; // Invalid dates go to end
+                if (isNaN(dateB)) return -1;
+                return dateB - dateA;
             }
             if (sortFilter === 'oldest') {
-                return new Date(a.lastMessage) - new Date(b.lastMessage);
+                const dateA = a.lastMessage ? new Date(a.lastMessage).getTime() : 0;
+                const dateB = b.lastMessage ? new Date(b.lastMessage).getTime() : 0;
+                if (isNaN(dateA)) return 1; // Invalid dates go to end
+                if (isNaN(dateB)) return -1;
+                return dateA - dateB;
             }
             if (sortFilter === 'most-messages') {
-                return b.messageCount - a.messageCount;
+                const countA = a.messageCount || 0;
+                const countB = b.messageCount || 0;
+                return countB - countA;
             }
             return 0;
         });
