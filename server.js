@@ -5,6 +5,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { postLeoThought, initTwitterClient } from './x-automation.js';
+import { postLeoThought, initTwitterClient } from './x-automation.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -364,9 +366,41 @@ process.on('SIGINT', () => {
     process.exit(0);
 });
 
+// Initialize X automation (if credentials are provided)
+let xPostInterval = null;
+function setupXAutomation() {
+    if (process.env.X_API_KEY && process.env.X_API_SECRET && process.env.X_ACCESS_TOKEN && process.env.X_ACCESS_TOKEN_SECRET) {
+        try {
+            if (initTwitterClient()) {
+                // Post every 5 minutes by default (300000 ms)
+                // Change X_POST_INTERVAL in .env to adjust:
+                // 300000 = 5 minutes
+                // 600000 = 10 minutes
+                // 3600000 = 1 hour
+                // 7200000 = 2 hours
+                const POST_INTERVAL = process.env.X_POST_INTERVAL ? parseInt(process.env.X_POST_INTERVAL) : 300000; // 5 minutes default
+                
+                // Schedule regular posts
+                xPostInterval = setInterval(() => {
+                    postLeoThought();
+                }, POST_INTERVAL);
+                
+                console.log(`📱 X automation enabled - posting every ${POST_INTERVAL / 60000} minutes`);
+            }
+        } catch (error) {
+            console.log('ℹ️ X automation disabled:', error.message);
+        }
+    } else {
+        console.log('ℹ️ X automation disabled - no X API credentials found');
+    }
+}
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🐱 Leo chat server running on port ${PORT}`);
     console.log(`Make sure your ANTHROPIC_API_KEY is set in .env`);
     console.log(`💾 Conversations file: ${CONVERSATIONS_FILE}`);
+    
+    // Setup X automation after server starts
+    setupXAutomation();
 });
 
