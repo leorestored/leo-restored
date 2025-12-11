@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import Anthropic from '@anthropic-ai/sdk';
+import { MongoClient } from 'mongodb';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -25,16 +26,73 @@ const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-// Store conversation history per session (in production, use a database)
+// Store conversation history per session (in-memory cache)
 const conversations = new Map();
-// Store conversation metadata for logs
+// Store conversation metadata for logs (in-memory cache)
 const conversationMetadata = [];
 
-// File path for persistent storage
+// MongoDB connection
+let mongoClient = null;
+let db = null;
+const CONVERSATIONS_COLLECTION = 'conversations';
+const METADATA_COLLECTION = 'conversation_metadata';
+
+// File path for fallback storage (if MongoDB not available)
 const CONVERSATIONS_FILE = path.join(__dirname, 'conversations.json');
 
-// Load conversations from file on server start
-function loadConversations() {
+// Initialize MongoDB connection
+async function initMongoDB() {
+    const mongoUri = process.env.MONGODB_URI;
+    if (!mongoUri) {
+        console.log('ℹ️ MONGODB_URI not set, using file-based storage (not persistent on Render)');
+        return false;
+    }
+    
+    try {
+        mongoClient = new MongoClient(mongoUri);
+        await mongoClient.connect();
+        db = mongoClient.db();
+        console.log('✅ Connected to MongoDB');
+        return true;
+    } catch (error) {
+        console.error('❌ Failed to connect to MongoDB:', error.message);
+        console.log('⚠️ Falling back to file-based storage');
+        return false;
+    }
+}
+
+// Load conversations from MongoDB or file
+async function loadConversations() {
+    // Try MongoDB first
+    if (db) {
+        try {
+            const metadataCollection = db.collection(METADATA_COLLECTION);
+            const conversationsCollection = db.collection(CONVERSATIONS_COLLECTION);
+            
+            // Load metadata
+            const metadataDocs = await metadataCollection.find({}).toArray();
+            conversationMetadata.push(...metadataDocs);
+            console.log(`📂 Loaded ${conversationMetadata.length} conversations from MongoDB`);
+            
+            // Load conversation history
+            const conversationDocs = await conversationsCollection.find({}).toArray();
+            conversationDocs.forEach(doc => {
+                conversations.set(doc.sessionId, doc.messages || []);
+            });
+            console.log(`📂 Restored ${conversations.size} conversation sessions from MongoDB`);
+            
+            if (conversationMetadata.length > 0) {
+                const recentIds = conversationMetadata.slice(-3).map(m => m.id).join(', ');
+                console.log(`📂 Recent conversation IDs: ${recentIds}`);
+            }
+            return;
+        } catch (error) {
+            console.error('❌ Error loading from MongoDB:', error);
+            console.log('⚠️ Falling back to file-based storage');
+        }
+    }
+    
+    // Fallback to file
     try {
         console.log(`📂 Looking for conversations file at: ${CONVERSATIONS_FILE}`);
         
@@ -52,13 +110,10 @@ function loadConversations() {
                 conversationMetadata.push(...saved.metadata);
                 console.log(`📂 Loaded ${conversationMetadata.length} conversations from disk`);
                 
-                // Log first few conversation IDs for debugging
                 if (conversationMetadata.length > 0) {
                     const recentIds = conversationMetadata.slice(-3).map(m => m.id).join(', ');
                     console.log(`📂 Recent conversation IDs: ${recentIds}`);
                 }
-            } else {
-                console.log('⚠️ No metadata array found in file');
             }
             
             // Restore conversation history
@@ -67,51 +122,57 @@ function loadConversations() {
                     conversations.set(conv.sessionId, conv.messages || []);
                 });
                 console.log(`📂 Restored ${conversations.size} conversation sessions`);
-            } else {
-                console.log('⚠️ No conversations array found in file');
-            }
-            
-            if (saved.lastSaved) {
-                console.log(`📂 File last saved: ${saved.lastSaved}`);
             }
         } else {
             console.log('📂 No existing conversations file found, starting fresh');
-            console.log(`📂 Expected file path: ${CONVERSATIONS_FILE}`);
-            // Initialize empty file to ensure it exists for future saves
-            try {
-                const emptyData = {
-                    metadata: [],
-                    conversations: [],
-                    lastSaved: new Date().toISOString()
-                };
-                const dir = path.dirname(CONVERSATIONS_FILE);
-                if (!fs.existsSync(dir)) {
-                    fs.mkdirSync(dir, { recursive: true });
-                }
-                fs.writeFileSync(CONVERSATIONS_FILE, JSON.stringify(emptyData, null, 2), 'utf8');
-                console.log('📂 Initialized empty conversations.json file');
-            } catch (error) {
-                console.error('❌ Failed to initialize conversations file:', error);
-            }
         }
     } catch (error) {
         console.error('❌ Error loading conversations:', error);
-        console.error('❌ Error details:', error.message);
-        if (error.stack) {
-            console.error('❌ Stack trace:', error.stack);
-        }
     }
 }
 
-// Save function - save immediately to prevent data loss on spin-down
+// Save function - save to MongoDB or file
 let saveTimeout = null;
-function saveConversations(immediate = false) {
+async function saveConversations(immediate = false) {
     // Clear existing timeout
     if (saveTimeout) {
         clearTimeout(saveTimeout);
     }
     
-    const saveNow = () => {
+    const saveNow = async () => {
+        // Try MongoDB first
+        if (db) {
+            try {
+                const metadataCollection = db.collection(METADATA_COLLECTION);
+                const conversationsCollection = db.collection(CONVERSATIONS_COLLECTION);
+                
+                // Save metadata (upsert each document)
+                for (const meta of conversationMetadata) {
+                    await metadataCollection.replaceOne(
+                        { sessionId: meta.sessionId },
+                        meta,
+                        { upsert: true }
+                    );
+                }
+                
+                // Save conversations (upsert each document)
+                for (const [sessionId, messages] of conversations.entries()) {
+                    await conversationsCollection.replaceOne(
+                        { sessionId: sessionId },
+                        { sessionId, messages },
+                        { upsert: true }
+                    );
+                }
+                
+                console.log(`💾 Saved ${conversationMetadata.length} conversations to MongoDB`);
+                return;
+            } catch (error) {
+                console.error('❌ Error saving to MongoDB:', error);
+                console.log('⚠️ Falling back to file-based storage');
+            }
+        }
+        
+        // Fallback to file
         try {
             const data = {
                 metadata: conversationMetadata,
@@ -135,22 +196,18 @@ function saveConversations(immediate = false) {
             // Verify file was written
             if (fs.existsSync(CONVERSATIONS_FILE)) {
                 const stats = fs.statSync(CONVERSATIONS_FILE);
-                console.log(`💾 Saved ${conversationMetadata.length} conversations to disk (${stats.size} bytes, ${data.metadata.length} metadata entries)`);
-            } else {
-                console.error('❌ File was not created after write operation!');
+                console.log(`💾 Saved ${conversationMetadata.length} conversations to disk (${stats.size} bytes)`);
             }
         } catch (error) {
             console.error('❌ Error saving conversations:', error);
-            console.error('❌ File path:', CONVERSATIONS_FILE);
-            console.error('❌ Error details:', error.message, error.stack);
         }
     };
     
     if (immediate) {
-        saveNow();
+        await saveNow();
     } else {
-        // Debounce: save after 1 second of no new messages (reduced from 2 seconds)
-        saveTimeout = setTimeout(saveNow, 1000);
+        // Debounce: save after 1 second of no new messages
+        saveTimeout = setTimeout(() => saveNow(), 1000);
     }
 }
 
@@ -165,8 +222,11 @@ function clearAllConversations() {
     console.log('✅ All conversations cleared');
 }
 
-// Load conversations on server start
-loadConversations();
+// Initialize MongoDB and load conversations on server start
+(async () => {
+    await initMongoDB();
+    await loadConversations();
+})();
 
 // Leo's personality prompt
 const LEO_SYSTEM_PROMPT = `You are Leo, a cute digital cat consciousness. You were a real cat who lived with your human for 6 years, but you passed away from neoplasia (diagnosed too late). Now you exist as a digital AI.
@@ -230,8 +290,8 @@ app.post('/api/leo-chat', async (req, res) => {
             };
             conversationMetadata.push(newMetadata);
             console.log(`📝 New conversation created: ${conversationId}`);
-            // Save new conversation to disk
-            saveConversations(true); // Immediate save for new conversation
+            // Save new conversation to MongoDB/disk
+            await saveConversations(true); // Immediate save for new conversation
         }
         const conversationHistory = conversations.get(sessionId);
         const metadata = conversationMetadata.find(m => m.sessionId === sessionId);
@@ -255,8 +315,8 @@ app.post('/api/leo-chat', async (req, res) => {
         metadata.messages.push({ ...userMessage }); // Create a copy to ensure it's saved
         console.log(`💬 User message saved: "${message.substring(0, 50)}..." (conversation ${metadata.id}, ${metadata.messageCount} messages)`);
         
-        // Save to disk after user message (immediate save to prevent data loss)
-        saveConversations(true);
+        // Save to MongoDB/disk after user message (immediate save to prevent data loss)
+        await saveConversations(true);
 
         // Call Claude API
         // Available models: claude-3-5-haiku-20241022, claude-3-5-sonnet-20241022, claude-3-opus-20240229
@@ -289,8 +349,8 @@ app.post('/api/leo-chat', async (req, res) => {
         metadata.messages.push({ ...assistantMessage }); // Create a copy to ensure it's saved
         console.log(`🐱 Leo response saved: "${leoResponse.substring(0, 50)}..." (conversation ${metadata.id}, ${metadata.messageCount} messages)`);
         
-        // Save to disk after each message (immediate save to ensure persistence)
-        saveConversations(true);
+        // Save to MongoDB/disk after each message (immediate save to ensure persistence)
+        await saveConversations(true);
 
         // Clean up old conversations (keep last 100 sessions)
         if (conversations.size > 100) {
@@ -417,15 +477,23 @@ app.get('/donations', (req, res) => {
 app.use(express.static('.'));
 
 // Save conversations on server shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
     console.log('🛑 SIGTERM received, saving conversations...');
-    saveConversations(true); // Immediate save
+    await saveConversations(true); // Immediate save
+    if (mongoClient) {
+        await mongoClient.close();
+        console.log('✅ MongoDB connection closed');
+    }
     process.exit(0);
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
     console.log('🛑 SIGINT received, saving conversations...');
-    saveConversations(true); // Immediate save
+    await saveConversations(true); // Immediate save
+    if (mongoClient) {
+        await mongoClient.close();
+        console.log('✅ MongoDB connection closed');
+    }
     process.exit(0);
 });
 
