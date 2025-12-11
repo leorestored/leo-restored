@@ -1,0 +1,121 @@
+{
+  "metadata": [
+    {
+      "id": "#LEO-20251210T094942-hnu",
+      "sessionId": "session-1765360179279-ru6a13hnu",
+      "status": "ACTIVE",
+      "firstMessage": "test!",
+      "messageCount": 4,
+      "startTime": "2025-12-10T09:49:42.802Z",
+      "lastMessage": "2025-12-10T09:49:49.113Z",
+      "messages": [
+        {
+          "role": "user",
+          "content": "test!",
+          "timestamp": "2025-12-10T09:49:42.805Z"
+        },
+        {
+          "role": "assistant",
+          "content": "testing what? (^•⩊•^)",
+          "timestamp": "2025-12-10T09:49:44.155Z"
+        },
+        {
+          "role": "user",
+          "content": "nevermind.",
+          "timestamp": "2025-12-10T09:49:47.605Z"
+        },
+        {
+          "role": "assistant",
+          "content": "okay! no worries (=^･ｪ･^=)",
+          "timestamp": "2025-12-10T09:49:49.113Z"
+        }
+      ],
+      "duration": 6
+    },
+    {
+      "id": "#LEO-20251211T031749-war",
+      "sessionId": "session-1765423067075-uzylzrwar",
+      "status": "ACTIVE",
+      "firstMessage": "hi!",
+      "messageCount": 4,
+      "startTime": "2025-12-11T03:17:49.744Z",
+      "lastMessage": "2025-12-11T03:17:56.065Z",
+      "messages": [
+        {
+          "role": "user",
+          "content": "hi!",
+          "timestamp": "2025-12-11T03:17:49.749Z"
+        },
+        {
+          "role": "assistant",
+          "content": "hi there! i'm leo, nice to meet you (^･ｪ･^)",
+          "timestamp": "2025-12-11T03:17:51.245Z"
+        },
+        {
+          "role": "user",
+          "content": "ca",
+          "timestamp": "2025-12-11T03:17:54.531Z"
+        },
+        {
+          "role": "assistant",
+          "content": "the contract address? oh, that's coming soon! stay tuned (=^･ｪ･^=)",
+          "timestamp": "2025-12-11T03:17:56.064Z"
+        }
+      ],
+      "duration": 6
+    }
+  ],
+  "conversations": [
+    {
+      "sessionId": "session-1765360179279-ru6a13hnu",
+      "messages": [
+        {
+          "role": "user",
+          "content": "test!",
+          "timestamp": "2025-12-10T09:49:42.805Z"
+        },
+        {
+          "role": "assistant",
+          "content": "testing what? (^•⩊•^)",
+          "timestamp": "2025-12-10T09:49:44.155Z"
+        },
+        {
+          "role": "user",
+          "content": "nevermind.",
+          "timestamp": "2025-12-10T09:49:47.605Z"
+        },
+        {
+          "role": "assistant",
+          "content": "okay! no worries (=^･ｪ･^=)",
+          "timestamp": "2025-12-10T09:49:49.113Z"
+        }
+      ]
+    },
+    {
+      "sessionId": "session-1765423067075-uzylzrwar",
+      "messages": [
+        {
+          "role": "user",
+          "content": "hi!",
+          "timestamp": "2025-12-11T03:17:49.749Z"
+        },
+        {
+          "role": "assistant",
+          "content": "hi there! i'm leo, nice to meet you (^･ｪ･^)",
+          "timestamp": "2025-12-11T03:17:51.245Z"
+        },
+        {
+          "role": "user",
+          "content": "ca",
+          "timestamp": "2025-12-11T03:17:54.531Z"
+        },
+        {
+          "role": "assistant",
+          "content": "the contract address? oh, that's coming soon! stay tuned (=^･ｪ･^=)",
+          "timestamp": "2025-12-11T03:17:56.064Z"
+        }
+      ]
+    }
+  ],
+  "lastSaved": "2025-12-11T03:17:57.067Z"
+}
