@@ -20,5 +20,5 @@ Thumbs.db
 # Railway
 .railway/
 
-# Conversation data (optional - you might want to commit this)
-# conversations.json
+# Conversation data - should NOT be in git (persists on server filesystem)
+conversations.json

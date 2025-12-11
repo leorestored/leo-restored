@@ -36,14 +36,29 @@ const CONVERSATIONS_FILE = path.join(__dirname, 'conversations.json');
 // Load conversations from file on server start
 function loadConversations() {
     try {
+        console.log(`📂 Looking for conversations file at: ${CONVERSATIONS_FILE}`);
+        
         if (fs.existsSync(CONVERSATIONS_FILE)) {
+            const stats = fs.statSync(CONVERSATIONS_FILE);
+            console.log(`📂 File exists, size: ${stats.size} bytes, modified: ${stats.mtime}`);
+            
             const data = fs.readFileSync(CONVERSATIONS_FILE, 'utf8');
             const saved = JSON.parse(data);
+            
+            console.log(`📂 File contains: ${saved.metadata?.length || 0} metadata entries, ${saved.conversations?.length || 0} conversation sessions`);
             
             // Restore conversation metadata
             if (saved.metadata && Array.isArray(saved.metadata)) {
                 conversationMetadata.push(...saved.metadata);
                 console.log(`📂 Loaded ${conversationMetadata.length} conversations from disk`);
+                
+                // Log first few conversation IDs for debugging
+                if (conversationMetadata.length > 0) {
+                    const recentIds = conversationMetadata.slice(-3).map(m => m.id).join(', ');
+                    console.log(`📂 Recent conversation IDs: ${recentIds}`);
+                }
+            } else {
+                console.log('⚠️ No metadata array found in file');
             }
             
             // Restore conversation history
@@ -52,12 +67,23 @@ function loadConversations() {
                     conversations.set(conv.sessionId, conv.messages || []);
                 });
                 console.log(`📂 Restored ${conversations.size} conversation sessions`);
+            } else {
+                console.log('⚠️ No conversations array found in file');
+            }
+            
+            if (saved.lastSaved) {
+                console.log(`📂 File last saved: ${saved.lastSaved}`);
             }
         } else {
             console.log('📂 No existing conversations file found, starting fresh');
+            console.log(`📂 Expected file path: ${CONVERSATIONS_FILE}`);
         }
     } catch (error) {
         console.error('❌ Error loading conversations:', error);
+        console.error('❌ Error details:', error.message);
+        if (error.stack) {
+            console.error('❌ Stack trace:', error.stack);
+        }
     }
 }
 
@@ -79,10 +105,28 @@ function saveConversations(immediate = false) {
                 })),
                 lastSaved: new Date().toISOString()
             };
-            fs.writeFileSync(CONVERSATIONS_FILE, JSON.stringify(data, null, 2));
-            console.log(`💾 Saved ${conversationMetadata.length} conversations to disk`);
+            
+            // Ensure directory exists
+            const dir = path.dirname(CONVERSATIONS_FILE);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            
+            // Write file with error handling
+            const jsonData = JSON.stringify(data, null, 2);
+            fs.writeFileSync(CONVERSATIONS_FILE, jsonData, 'utf8');
+            
+            // Verify file was written
+            if (fs.existsSync(CONVERSATIONS_FILE)) {
+                const stats = fs.statSync(CONVERSATIONS_FILE);
+                console.log(`💾 Saved ${conversationMetadata.length} conversations to disk (${stats.size} bytes, ${data.metadata.length} metadata entries)`);
+            } else {
+                console.error('❌ File was not created after write operation!');
+            }
         } catch (error) {
             console.error('❌ Error saving conversations:', error);
+            console.error('❌ File path:', CONVERSATIONS_FILE);
+            console.error('❌ Error details:', error.message, error.stack);
         }
     };
     
