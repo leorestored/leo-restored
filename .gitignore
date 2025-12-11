@@ -22,3 +22,6 @@ Thumbs.db
 
 # Conversation data - should NOT be in git (persists on server filesystem)
 conversations.json
+
+# X credentials (sensitive)
+X_CREDENTIALS_NEW_ACCOUNT.txt

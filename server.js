@@ -549,6 +549,8 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`💾 Conversations file: ${CONVERSATIONS_FILE}`);
     
     // Setup X automation after server starts
-    setupXAutomation();
+    // DISABLED - Will be re-enabled when requested
+    // setupXAutomation();
+    console.log('ℹ️ X automation is currently disabled');
 });
 
