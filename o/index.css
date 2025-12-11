@@ -228,7 +228,6 @@ html {
     z-index: 1;
     max-width: calc(var(--full-height) - 6vh);
     height: calc(var(--full-height) - 6vh);
-    min-height: fit-content;
     animation-delay: 0.5s;
 
     --grid-gap: 1vh;
@@ -643,40 +642,13 @@ body {
     }
 }
 
-/* Mobile viewport fixes */
+/* Mobile viewport fixes - minimal fix to prevent top content from being cut off */
 @media (max-width: 768px) {
-    html {
-        --full-height: 100vh;
-        height: auto;
-        min-height: 100vh;
-    }
-    
     body {
-        position: relative;
-        min-height: 100vh;
-        height: auto;
-        padding-top: env(safe-area-inset-top);
+        padding-top: env(safe-area-inset-top, 0);
     }
     
     #罪 {
-        max-width: 100vw;
-        width: 100vw;
-        height: auto;
-        min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-        padding: 1vh 0;
-        margin: 0 auto;
-    }
-    
-    body.flex {
-        min-height: 100vh;
-        height: auto;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding: 0;
-    }
-    
-    .grid {
-        min-height: 100vh;
-        height: auto;
+        padding-top: 2vh;
     }
 }
