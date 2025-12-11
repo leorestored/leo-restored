@@ -77,6 +77,22 @@ function loadConversations() {
         } else {
             console.log('📂 No existing conversations file found, starting fresh');
             console.log(`📂 Expected file path: ${CONVERSATIONS_FILE}`);
+            // Initialize empty file to ensure it exists for future saves
+            try {
+                const emptyData = {
+                    metadata: [],
+                    conversations: [],
+                    lastSaved: new Date().toISOString()
+                };
+                const dir = path.dirname(CONVERSATIONS_FILE);
+                if (!fs.existsSync(dir)) {
+                    fs.mkdirSync(dir, { recursive: true });
+                }
+                fs.writeFileSync(CONVERSATIONS_FILE, JSON.stringify(emptyData, null, 2), 'utf8');
+                console.log('📂 Initialized empty conversations.json file');
+            } catch (error) {
+                console.error('❌ Failed to initialize conversations file:', error);
+            }
         }
     } catch (error) {
         console.error('❌ Error loading conversations:', error);
@@ -416,23 +432,40 @@ process.on('SIGINT', () => {
 // Initialize X automation (if credentials are provided)
 let xPostInterval = null;
 function setupXAutomation() {
+    // Prevent multiple intervals from being set up
+    if (xPostInterval !== null) {
+        console.log('⚠️ X automation already initialized, skipping duplicate setup');
+        return;
+    }
+    
     if (process.env.X_API_KEY && process.env.X_API_SECRET && process.env.X_ACCESS_TOKEN && process.env.X_ACCESS_TOKEN_SECRET) {
         try {
             if (initTwitterClient()) {
-                // Post every 5 minutes by default (300000 ms)
+                // Post every ~85 minutes by default (5100000 ms) to stay within 17 posts/24h limit
+                // 24 hours = 1440 minutes / 17 posts = ~85 minutes per post
                 // Change X_POST_INTERVAL in .env to adjust:
-                // 300000 = 5 minutes
-                // 600000 = 10 minutes
-                // 3600000 = 1 hour
-                // 7200000 = 2 hours
-                const POST_INTERVAL = process.env.X_POST_INTERVAL ? parseInt(process.env.X_POST_INTERVAL) : 300000; // 5 minutes default
+                // 5100000 = ~85 minutes (17 posts/day - safe for free tier)
+                // 3600000 = 1 hour (24 posts/day - exceeds limit!)
+                // 7200000 = 2 hours (12 posts/day - safe)
+                // 10800000 = 3 hours (8 posts/day - very safe)
+                // NOTE: X API free tier limit is 17 posts per 24 hours
+                // - Posting every 85 minutes = ~17 posts/day (at the limit)
+                // - To be safer, use 90-100 minutes or upgrade your X API tier
+                const POST_INTERVAL = process.env.X_POST_INTERVAL ? parseInt(process.env.X_POST_INTERVAL) : 5100000; // ~85 minutes default (17 posts/day)
                 
                 // Schedule regular posts
                 xPostInterval = setInterval(() => {
                     postLeoThought();
                 }, POST_INTERVAL);
                 
-                console.log(`📱 X automation enabled - posting every ${POST_INTERVAL / 60000} minutes`);
+                const intervalMinutes = Math.round(POST_INTERVAL / 60000);
+                const postsPerDay = Math.round((24 * 60) / intervalMinutes);
+                console.log(`📱 X automation enabled - posting every ${intervalMinutes} minutes (${postsPerDay} posts/day)`);
+                console.log(`ℹ️ Note: If you hit rate limits (429 errors), posts will be skipped until limits reset (24 hours)`);
+                console.log(`⚠️ WARNING: X API free tier limit is 17 posts per 24 hours. Current setting: ${postsPerDay} posts/day`);
+                if (postsPerDay > 17) {
+                    console.log(`⚠️ ⚠️ ⚠️ You are EXCEEDING the limit! Increase X_POST_INTERVAL to avoid rate limits!`);
+                }
             }
         } catch (error) {
             console.log('ℹ️ X automation disabled:', error.message);

@@ -164,7 +164,23 @@ async function postToX(postText) {
         console.log(`📱 Tweet ID: ${tweet.data.id}`);
         return true;
     } catch (error) {
+        // Check for rate limit errors
+        if (error.code === 429 || (error.data && error.data.status === 429)) {
+            const headers = error.headers || {};
+            const appLimitRemaining = headers['x-app-limit-24hour-remaining'];
+            const userLimitRemaining = headers['x-user-limit-24hour-remaining'];
+            
+            console.error('⚠️ X API Rate Limit Hit (429 Too Many Requests)');
+            console.error(`📊 App 24h limit remaining: ${appLimitRemaining !== undefined ? appLimitRemaining : 'unknown'}`);
+            console.error(`📊 User 24h limit remaining: ${userLimitRemaining !== undefined ? userLimitRemaining : 'unknown'}`);
+            console.error('⏸️ Skipping post. Rate limits reset every 24 hours. Will try again on next interval.');
+            return false;
+        }
+        
         console.error('❌ Error posting to X:', error);
+        if (error.data) {
+            console.error('❌ Error details:', error.data);
+        }
         return false;
     }
 }
