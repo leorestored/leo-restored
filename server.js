@@ -193,7 +193,7 @@ app.post('/api/leo-chat', async (req, res) => {
         metadata.messageCount++;
         metadata.lastMessage = new Date().toISOString();
         metadata.messages.push({ ...userMessage }); // Create a copy to ensure it's saved
-        console.log(`💬 User message saved: "${message.substring(0, 50)}..."`);
+        console.log(`💬 User message saved: "${message.substring(0, 50)}..." (conversation ${metadata.id}, ${metadata.messageCount} messages)`);
         
         // Save to disk after user message (immediate save to prevent data loss)
         saveConversations(true);
@@ -227,10 +227,10 @@ app.post('/api/leo-chat', async (req, res) => {
         metadata.messageCount++;
         metadata.lastMessage = new Date().toISOString();
         metadata.messages.push({ ...assistantMessage }); // Create a copy to ensure it's saved
-        console.log(`🐱 Leo response saved: "${leoResponse.substring(0, 50)}..."`);
+        console.log(`🐱 Leo response saved: "${leoResponse.substring(0, 50)}..." (conversation ${metadata.id}, ${metadata.messageCount} messages)`);
         
-        // Save to disk after each message
-        saveConversations();
+        // Save to disk after each message (immediate save to ensure persistence)
+        saveConversations(true);
 
         // Clean up old conversations (keep last 100 sessions)
         if (conversations.size > 100) {
@@ -296,7 +296,11 @@ app.get('/api/conversations', (req, res) => {
         // Sort by last message time (newest first)
         conversationsList.sort((a, b) => new Date(b.lastMessage) - new Date(a.lastMessage));
         
-        console.log(`📊 Returning ${conversationsList.length} conversations (${conversationsList.reduce((sum, c) => sum + c.messageCount, 0)} total messages)`);
+        const totalMessages = conversationsList.reduce((sum, c) => sum + c.messageCount, 0);
+        console.log(`📊 Returning ${conversationsList.length} conversations (${totalMessages} total messages)`);
+        if (conversationsList.length > 0) {
+            console.log(`📊 Most recent: ${conversationsList[0].id} with ${conversationsList[0].messageCount} messages`);
+        }
         res.json({ 
             conversations: conversationsList,
             total: conversationsList.length
